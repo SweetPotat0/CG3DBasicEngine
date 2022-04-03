@@ -23,39 +23,40 @@ Game::Game()
 
 void Game::Init()
 {		
-	unsigned int texIDs[3] = { 0 , 1, 2};
+	unsigned int texIDs[3] = { 0 , 1, 2 };
 	unsigned int slots[3] = { 0 , 1, 2 };
 	
-	AddShader("shaders/pickingShader");
-	AddShader("shaders/cubemapShader");
-	AddShader("shaders/basicShader");
-	AddShader("shaders/pickingShader");
+	AddShader("shaders/pickingShader");//0
+	AddShader("shaders/cubemapShader");//1
+	AddShader("shaders/basicShader");//2
+	AddShader("shaders/pickingShader");//3
 	
-	AddTexture("textures/box0.bmp",2);
-	AddTexture("textures/cubemaps/Daylight Box_", 3);
-	AddTexture("textures/grass.bmp", 2);
+	AddTexture("textures/box0.bmp",2);//0
+	AddTexture("textures/cubemaps/Daylight Box_", 3);//1
+	AddTexture("textures/grass.bmp", 2);//2
 	//AddTexture("../res/textures/Cat_bump.jpg", 2);
 
 	AddMaterial(texIDs,slots, 1);
 	AddMaterial(texIDs+1, slots+1, 1);
 	AddMaterial(texIDs + 2, slots + 2, 1);
 	
-	AddShape(Cube, -2, TRIANGLES);
-	AddShape(Tethrahedron, -1, TRIANGLES);
+	AddShape(Cube, -2, TRIANGLES);//0
+	AddShape(Tethrahedron, -1, TRIANGLES);//1
 	
-	AddShape(Octahedron, -1, TRIANGLES);
-	AddShape(Octahedron, 2, LINE_LOOP);
-    AddShape(Tethrahedron, 1, LINE_LOOP);
+	AddShape(Octahedron, -1, TRIANGLES);//2
+	AddShape(Octahedron, 2, LINE_LOOP);//3
+    AddShape(Tethrahedron, 1, LINE_LOOP);//4
 
 //    AddShape(Cube, -1, TRIANGLES);
-	AddShapeFromFile("data/sphere.obj", -1, TRIANGLES);
+	AddShapeFromFile("data/sphere.obj", -1, TRIANGLES);//5
 	//AddShapeFromFile("../res/objs/Cat_v1.obj", -1, TRIANGLES);
-	AddShape(Plane, -2, TRIANGLES,3);
+	AddShape(Plane, -2, TRIANGLES,3);//6
 
 	SetShapeShader(1, 2);
 	SetShapeShader(2, 2);
 	SetShapeShader(5, 2);
 	SetShapeShader(6, 3);
+
 	SetShapeMaterial(1, 0);
 	SetShapeMaterial(0, 1);
 	SetShapeMaterial(2, 2);
