@@ -1,12 +1,12 @@
-#include "igl/opengl/glfw/renderer.h"
-#include "Assignment1.h"
-#include "InputManager.h"
+#include "./igl/opengl/glfw/renderer.h"
+#include "./Assignment1.h"
+#include "./InputManager.h"
 
 int main(int argc,char *argv[])
 {
-	const int DISPLAY_WIDTH = 800;
+	const int DISPLAY_WIDTH = 1200;
 	const int DISPLAY_HEIGHT = 800;
-	const float CAMERA_ANGLE = 45.0f;
+	const float CAMERA_ANGLE = 0.0f;
 	const float NEAR = 1.0f;
 	const float FAR = 120.0f;
 	const int infoIndx = 2; 
@@ -15,7 +15,7 @@ int main(int argc,char *argv[])
 	y.push_back(DISPLAY_HEIGHT);
     Display disp = Display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OPENGL");
     igl::opengl::glfw::imgui::ImGuiMenu* menu = new igl::opengl::glfw::imgui::ImGuiMenu();
-    Renderer* rndr = new Renderer(CAMERA_ANGLE, (float)DISPLAY_WIDTH/(float)DISPLAY_HEIGHT, NEAR, FAR);
+    Renderer* rndr = new Renderer(CAMERA_ANGLE, (float)DISPLAY_WIDTH/(float)DISPLAY_HEIGHT/2, NEAR, FAR);
 	Assignment1 *scn = new Assignment1();  //initializing scene
 	
     Init(disp,menu); //adding callback functions
