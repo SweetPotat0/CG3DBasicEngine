@@ -2,12 +2,12 @@
 
 uniform vec4 eye;
 uniform vec4 ambient;
-uniform vec4[20] objects;
+uniform vec4[20] objects;//center coordinates + radius / normal + d
 uniform vec4[20] objColors;
 uniform vec4[10] lightsDirection;
 uniform vec4[10] lightsIntensity;
 uniform vec4[10] lightsPosition;
-uniform ivec4 sizes;
+uniform ivec4 sizes;// total object num, lights num, reflecting object num, transmitting object num
 
 in vec3 position0;
 in vec3 normal0;
@@ -145,41 +145,58 @@ vec3 colorCalc(int sourceIndx, vec3 sourcePoint,vec3 u,float diffuseFactor)
 
 void main()
 {  
-     vec3 eyeDiff = eye.xyw;
-     vec3 v = normalize( position0 + eyeDiff - eye.xyz);
-     int indx = -1;
-      float t = intersection(indx,position0 + eyeDiff ,v);
-     if(indx < 0)
-         // discard;
-        gl_FragColor = vec4(1.0,1.0,1.0,1.0);
-     else
-     {
-         //v= normalize( position0 - eye.xyz);
-         //mirror
-         int counter = 5;
-         vec3 p = position0 + eyeDiff + t*v;
-         vec3 n;
-         while(counter>0 && indx<sizes.z-0.1f)
-         {
-             if(objects[indx].w <=0)
-                 n = normalize(objects[indx].xyz);
-             else 
-                 n = normalize(p - objects[indx].xyz);
-             v = normalize(reflect(v,n));
-             t = intersection(indx,p,v);
-             counter--;
-             p = p + t*v;
-         }
+    //Start: Calculate final hit point after 'counter' iterations
 
-         float x = p.x;//max(abs(p.x),abs(p.y))*sign(p.x+p.y);
-         float y = p.y;//max(min(abs(p.y),abs(p.x)),abs(p.z))*sign(min(abs(p.y),abs(p.x))+p.z);
-      
-         //if(objects[indx].w <= 0 && (mod(int(abs(1.5*x)),2) == mod(int(abs(1.5*y)),2)))
-         if(objects[indx].w <= 0 && (((mod(int(1.5*x),2) == mod(int(1.5*y),2)) && ((x>0 && y>0) || (x<0 && y<0))) || ((mod(int(1.5*x),2) != mod(int(1.5*y),2) && ((x<0 && y>0) || (x>0 && y<0))))))
-             gl_FragColor = vec4(colorCalc(indx,p,v,0.5),1);
-         else 
-             gl_FragColor = vec4(colorCalc(indx,p,v,1.0),1);      
-     }
+    vec3 eyeDiff = eye.xyw;
+    vec3 v = normalize( position0 + eyeDiff - eye.xyz);
+    int indx = -1;
+    float t = intersection(indx,position0 + eyeDiff ,v);//t is the size of the intersection vector v
+    if(indx < 0)
+        //didn't hit any object
+        gl_FragColor = vec4(1.0,1.0,1.0,1.0);
+    else
+    {
+        //Hit object: objects[indx]
+        //v= normalize( position0 - eye.xyz);
+        //mirror
+        int counter = 5;
+        //position0 is the point on the plane which the camera hits(the pixel from which we wonna shoot a ray)
+        vec3 p = position0 + eyeDiff + t*v;//Calculate hitting point
+        //The normal to the object we are gonna hit
+        vec3 n;
+        while(counter>0 && indx<sizes.z-0.1f)
+        {
+            if(objects[indx].w <=0)
+            {
+                //Plane.
+                n = normalize(objects[indx].xyz);
+            }
+            else{
+                //Sphere. calculate proportionally to the center point
+                n = normalize(p - objects[indx].xyz);
+            }
+            //Reflect v propotionally to the normal vector n
+            v = normalize(reflect(v,n));
+            //t is the size of the intersection vector v
+            t = intersection(indx,p,v);
+            counter--;
+            //Calculate new hitting point
+            p = p + t*v;
+        }
+
+        //End: Calculate final hit point after 'counter' iterations
+
+        //Calculate color of final hit point
+        
+        float x = p.x;//max(abs(p.x),abs(p.y))*sign(p.x+p.y);
+        float y = p.y;//max(min(abs(p.y),abs(p.x)),abs(p.z))*sign(min(abs(p.y),abs(p.x))+p.z);
+
+        //if(objects[indx].w <= 0 && (mod(int(abs(1.5*x)),2) == mod(int(abs(1.5*y)),2)))
+        if(objects[indx].w <= 0 && (((mod(int(1.5*x),2) == mod(int(1.5*y),2)) && ((x>0 && y>0) || (x<0 && y<0))) || ((mod(int(1.5*x),2) != mod(int(1.5*y),2) && ((x<0 && y>0) || (x>0 && y<0))))))
+            gl_FragColor = vec4(colorCalc(indx,p,v,0.5),1);
+        else 
+            gl_FragColor = vec4(colorCalc(indx,p,v,1.0),1);      
+    }
 }
  
 
