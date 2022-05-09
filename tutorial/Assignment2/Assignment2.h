@@ -4,11 +4,10 @@
 class Assignment2 : public igl::opengl::glfw::Viewer
 {
 	int xResolution, yResolution;
-	float xOldPos, yOldPos, xRel, yRel, xPos, yPos;
+	float xOldPos, yOldPos, xRel, yRel, xCamPos, yCamPos;
 	bool isPressed;
 	bool isRightPressed;
 	int sourceIndx;
-	int xRotate, yRotate;
 public:
 
 	Assignment2();
@@ -26,7 +25,6 @@ public:
 	void SetRightPress() { isRightPressed = !isRightPressed; }
 	float Intersection(Eigen::Vector3f sourcePoint);
 	void RotateEye(float amt, bool upDown);
-	void myRotate(int amt, bool upDown);
 	~Assignment2(void);
 };
 

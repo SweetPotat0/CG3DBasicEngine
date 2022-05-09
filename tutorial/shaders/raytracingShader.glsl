@@ -1,6 +1,6 @@
  #version 330 
 
-uniform float xRotate;
+uniform vec2 posChange;
 uniform vec4 eye;
 uniform vec4 ambient;
 uniform vec4[20] objects;
@@ -159,6 +159,7 @@ mat4 rotationMatrix(vec3 axis, float angle)
 
 void main()
 {  
+    
     //mat4 xRotate = rotationMatrix(vec3(1,0,0), xRotate/2);
     //mat4 tIn = mat4(1.0, 0.0, 0.0, -position0.x,
     //                0.0, 1.0, 0.0, -position0.y,
@@ -172,7 +173,8 @@ void main()
     vec3 v = normalize( position0 - eye.xyz);
 
     int indx = -1;
-     float t = intersection(indx,eye.xyz ,v);
+    vec3 newEye = vec3(eye.x + posChange.x, eye.y + posChange.y, eye.z); 
+     float t = intersection(indx,newEye ,v);
     if(indx < 0)
         discard;
     //    gl_FragColor = vec4(1.0,1.0,1.0,1.0);

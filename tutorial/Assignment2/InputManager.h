@@ -99,14 +99,12 @@ void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, in
 
 		case GLFW_KEY_UP:
 			//rndr->MoveCamera(0, scn->xRotate, 0.05f);
-			scn->myRotate(1, true);
-			//scn->RotateEye(0.05f, true);
+			scn->RotateEye(0.05f, true);
 			break;
 		case GLFW_KEY_DOWN:
 			//scn->shapeTransformation(scn->xGlobalRotate,-5.f);
 			//cout<< "down: "<<endl;
-			scn->myRotate(-1, true);
-			//scn->RotateEye(-0.05f, true);
+			scn->RotateEye(-0.05f, true);
 			break;
 		case GLFW_KEY_LEFT:
 			scn->RotateEye(0.05f, false);
