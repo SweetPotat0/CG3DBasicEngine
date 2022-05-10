@@ -101,7 +101,7 @@ vec3 colorCalc(int sourceIndx, vec3 sourcePoint,vec3 u,float diffuseFactor)
             float t = intersection(indx,sourcePoint,-v);
 
             
-            if(indx < 0 || objects[indx].w<=0) //no intersection
+            if(indx < 0 || objects[indx].w<=0 || indx <= sizes.w) //no intersection
             {
                // vec3 u = normalize(sourcePoint - eye.xyz);
                 if(objects[sourceIndx].w > 0) //sphere
@@ -141,7 +141,7 @@ vec3 colorCalc(int sourceIndx, vec3 sourcePoint,vec3 u,float diffuseFactor)
             {
                 //vec3 u = normalize(sourcePoint - eye.xyz);
                 float t = intersection(indx,lightsPosition[i].xyz,v);
-                if(indx == sourceIndx) //no intersection
+                if(indx <= sizes.w || indx == sourceIndx) //no intersection
                 {
                     if(objects[sourceIndx].w > 0) //sphere
                     {
@@ -206,8 +206,7 @@ void main()
     vec3 newEye = vec3(eye.x + posChange.x, eye.y + posChange.y, eye.z); 
     float t = intersection(indx,newEye ,v);
     if(indx < 0)
-        discard;
-    //    gl_FragColor = vec4(1.0,1.0,1.0,1.0);
+       gl_FragColor = vec4(0.0,1.0,0.0,1.0);
     else
     {
         //mirror
@@ -215,12 +214,12 @@ void main()
         vec3 p = newEye + t*v;
         vec3 n;
         while(counter>0 && indx<sizes.z + sizes.w) {
-            if (indx <= sizes.w){    // transperant
+            if (indx <= sizes.w) {    // transperant
                 n = normalize(objects[indx].xyz - p);
                 //first in brake light
                 v = normalize(brakeLight(v,n,1/1.5));
                 t = innerIntersection(indx,p,v);
-                p = p + t*v;
+                p = p + t * v;
                 //find new normal
                 n = normalize(-p+objects[indx].xyz);
                 //second out brake light
