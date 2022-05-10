@@ -63,39 +63,39 @@ SceneParser::SceneParser(const std::string& fileName, SceneData* data)
             switch(lineCStr[0])
             {
 			
-                case 'e':
+                case 'e'://The camera coords. w is additional
 					data->eye = parseVec4(line);			
 				break;
-				case 'a':
+				case 'a'://ambient light
 					data->ambient = parseVec4(line);
 				break;
-				case 'r':
+				case 'r'://reflective object
 					refobjects.push_back(parseVec4(line));
 					refIndx.push_back(counter);
 					counter++;
 					rCounter++;
 					break;
-				case 't':
+				case 't'://transparent object
 					data->objects.push_back(parseVec4(line));
 					trIndx.push_back(counter);
 					counter++;
 					tCounter++;
 					break;
-				case 'o':
+				case 'o'://not reflect or transparent object (regular)
 					notRefIndx.push_back(counter);
 					counter++;
 					notRefobjects.push_back( parseVec4(line));
 				break;
-				case 'c':
+				case 'c'://ambient&diffuse colors of objects
 					notRefColor.push_back( parseVec4(line));
 				break;
-				case 'd':
+				case 'd'://light direction: (x,y,z). [w=0]:directionalLight,[w=1]:spotLight
 					data->directions.push_back( parseVec4(line));
 				break;
-				case 'p':
+				case 'p'://spotLight's position: (x,y,z). w- the cosine of the angle
 					data->lights.push_back( parseVec4(line));
 				break;
-				case 'i':
+				case 'i'://light's intensity
 					data->intensities.push_back( parseVec4(line));
 				break;
 				

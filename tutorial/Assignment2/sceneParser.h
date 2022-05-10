@@ -10,8 +10,8 @@ struct SceneData
 {
 	Eigen::Vector4f eye;         //position + shine
 	Eigen::Vector4f ambient;
-	Eigen::Vector4i sizes;				// total object num, lights num, reflecting object num, transmitting object num
-	std::vector<Eigen::Vector4f> objects;      //center coordinates + radius / normal + d
+	Eigen::Vector4i sizes;				// total object num, lights num, reflecting object num, transparent object num
+	std::vector<Eigen::Vector4f> objects;       //center coordinates + radius / normal + d. order: transparent->reflective->else
 	std::vector<Eigen::Vector4f> lights;        //position + cos(angle)
 	std::vector<Eigen::Vector4f> directions;     //direction +  is directional 0.0/1.0
 	std::vector<Eigen::Vector4f> colors;

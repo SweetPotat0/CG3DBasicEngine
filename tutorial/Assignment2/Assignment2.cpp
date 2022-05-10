@@ -15,7 +15,7 @@ static void printMat(const Eigen::Matrix4d& mat)
 
 Assignment2::Assignment2()
 {
-	SceneParser("C:\\Users\\ido\\Documents\\GitHub\\CG3DBasicEngine1\\tutorial\\Assignment2\\scene4.txt", &scnData);
+	SceneParser("C:\\Users\\guyma\\Desktop\\scene4.txt", &scnData);
 	xResolution = 800;
 	yResolution = 800;
 	sourceIndx = -1;
@@ -82,9 +82,6 @@ void Assignment2::SetPosition(int x, int y)
 	{
 		xRel = -xOldPos + (float)x / xResolution;
 		yRel = yOldPos - (float)y / yResolution;
-
-		xOldPos += (float)xRel;
-		yOldPos -= (float)(yRel);
 		if (isRightPressed)
 		{
 			if (sourceIndx >= 0)
@@ -99,12 +96,8 @@ void Assignment2::SetPosition(int x, int y)
 			yCamPos += yRel * 2;
 		}
 	}
-	else
-	{
-		xOldPos = ((float)x / xResolution);
-		yOldPos = (float)(y) / yResolution;
-
-	}
+    xOldPos = ((float)x / xResolution);
+    yOldPos = (float)(y) / yResolution;
 }
 
 

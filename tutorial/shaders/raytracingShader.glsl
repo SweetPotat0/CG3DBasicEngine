@@ -13,6 +13,33 @@ uniform ivec4 sizes;
 in vec3 position0;
 in vec3 normal0;
 
+float innerIntersection(int sourceIndx,vec3 sourcePoint,vec3 v)
+{
+    float tmin = 1.0e10;
+    if(objects[sourceIndx].w > 0) //sphere
+    {
+        vec3 p0o =  objects[sourceIndx].xyz - sourcePoint;
+        float r = objects[sourceIndx].w;
+        float b = dot(v,p0o);
+        float delta = b*b - dot(p0o,p0o) + r*r;
+        float t;
+        if(delta >= 0)
+        {
+            if(b>=0)
+                t = b - sqrt(delta);
+            else
+                t = b + sqrt(delta);
+            if(t<tmin && t>0)
+            {
+                tmin = t;
+            } 
+        }   
+    } else {
+        //nothing. plains cant be transparent
+    }
+    return tmin;
+}
+
 float intersection(inout int sourceIndx,vec3 sourcePoint,vec3 v)
 {
     float tmin = 1.0e10;
@@ -75,7 +102,7 @@ vec3 colorCalc(int sourceIndx, vec3 sourcePoint,vec3 u,float diffuseFactor)
 
             
             if(indx < 0 || objects[indx].w<=0) //no intersection
-             {
+            {
                // vec3 u = normalize(sourcePoint - eye.xyz);
                 if(objects[sourceIndx].w > 0) //sphere
                 {
@@ -157,9 +184,12 @@ mat4 rotationMatrix(vec3 axis, float angle)
                 0.0,                                0.0,                                0.0,                                1.0);
 }
 
+vec3 brakeLight(vec3 v,vec3 n,float myu){
+    return sqrt(1-(myu*myu)*(1-(dot(n,v)*dot(n,v))))*n + myu*(v-dot(n,v)*n);
+}
+
 void main()
 {  
-    
     //mat4 xRotate = rotationMatrix(vec3(1,0,0), xRotate/2);
     //mat4 tIn = mat4(1.0, 0.0, 0.0, -position0.x,
     //                0.0, 1.0, 0.0, -position0.y,
@@ -174,7 +204,7 @@ void main()
 
     int indx = -1;
     vec3 newEye = vec3(eye.x + posChange.x, eye.y + posChange.y, eye.z); 
-     float t = intersection(indx,newEye ,v);
+    float t = intersection(indx,newEye ,v);
     if(indx < 0)
         discard;
     //    gl_FragColor = vec4(1.0,1.0,1.0,1.0);
@@ -182,13 +212,22 @@ void main()
     {
         //mirror
        int counter = 5;
-        vec3 p = eye.xyz + t*v;
+        vec3 p = newEye + t*v;
         vec3 n;
-        while(counter>0 && indx<sizes.z + sizes.w){
-
-
+        while(counter>0 && indx<sizes.z + sizes.w) {
             if (indx <= sizes.w){    // transperant
-                discard;
+                n = normalize(objects[indx].xyz - p);
+                //first in brake light
+                v = normalize(brakeLight(v,n,1/1.5));
+                t = innerIntersection(indx,p,v);
+                p = p + t*v;
+                //find new normal
+                n = normalize(-p+objects[indx].xyz);
+                //second out brake light
+                v = normalize(brakeLight(v,n,1.5/1));
+                t = intersection(indx,p,v);
+                p = p + t*v;
+                counter--;
                 //n = normalize(objects[indx].xyz);
                 //float angel1 = dot(n,v) * length(n) * length(v);
                 //vec3 t = (1.0/1.5) * cos(angel1) 

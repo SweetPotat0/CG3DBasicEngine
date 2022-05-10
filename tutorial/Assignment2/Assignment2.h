@@ -21,7 +21,7 @@ public:
 	void WhenTranslate();
 	void Animate() override;
 	void ScaleAllShapes(float amt, int viewportIndx);
-	void SetPress() { isPressed = !isPressed; }
+	void SetPress(bool isPrs) { isPressed = isPrs; }
 	void SetRightPress() { isRightPressed = !isRightPressed; }
 	float Intersection(Eigen::Vector3f sourcePoint);
 	void RotateEye(float amt, bool upDown);
