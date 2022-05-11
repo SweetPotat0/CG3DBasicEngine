@@ -15,29 +15,15 @@ in vec3 normal0;
 
 float innerIntersection(int sourceIndx,vec3 sourcePoint,vec3 v)
 {
-    float tmin = 1.0e10;
+    float t = 0;
     if(objects[sourceIndx].w > 0) //sphere
     {
-        vec3 p0o =  objects[sourceIndx].xyz - sourcePoint;
+        vec3 rVec =  normalize(objects[sourceIndx].xyz - sourcePoint);
+        float cosAlfa = dot(rVec,v);
         float r = objects[sourceIndx].w;
-        float b = dot(v,p0o);
-        float delta = b*b - dot(p0o,p0o) + r*r;
-        float t;
-        if(delta >= 0)
-        {
-            if(b>=0)
-                t = b - sqrt(delta);
-            else
-                t = b + sqrt(delta);
-            if(t<tmin && t>0)
-            {
-                tmin = t;
-            } 
-        }   
-    } else {
-        //nothing. plains cant be transparent
+        t = 2*r*cosAlfa;
     }
-    return tmin;
+    return t;
 }
 
 float intersection(inout int sourceIndx,vec3 sourcePoint,vec3 v)
@@ -190,23 +176,14 @@ vec3 brakeLight(vec3 v,vec3 n,float myu){
 
 void main()
 {  
-    //mat4 xRotate = rotationMatrix(vec3(1,0,0), xRotate/2);
-    //mat4 tIn = mat4(1.0, 0.0, 0.0, -position0.x,
-    //                0.0, 1.0, 0.0, -position0.y,
-    //                0.0, 0.0, 1.0, -position0.z,
-    //                0.0, 0.0, 0.0, 1.0);
-    //mat4 tOut = mat4(1.0, 0.0, 0.0, position0.x,
-    //                0.0, 1.0, 0.0, position0.y,
-    //                0.0, 0.0, 1.0, position0.z,
-    //                0.0, 0.0, 0.0, 1.0);
-    //vec4 position = tOut * xRotate * tIn * vec4(position0,1);
-    vec3 v = normalize( position0 - eye.xyz);
-
     int indx = -1;
     vec3 newEye = vec3(eye.x + posChange.x, eye.y + posChange.y, eye.z); 
+    vec3 v = normalize( position0 - newEye);
     float t = intersection(indx,newEye ,v);
-    if(indx < 0)
+    if(indx < 0){
        gl_FragColor = vec4(0.0,1.0,0.0,1.0);
+       return;
+    }
     else
     {
         //mirror
@@ -214,22 +191,23 @@ void main()
         vec3 p = newEye + t*v;
         vec3 n;
         while(counter>0 && indx<sizes.z + sizes.w) {
-            if (indx <= sizes.w) {    // transperant
+            if(indx < 0){
+                gl_FragColor = vec4(0.0,1.0,0.0,1.0);
+                return;
+            }
+            else if (indx <= sizes.w) {// transperant
                 n = normalize(objects[indx].xyz - p);
                 //first in brake light
                 v = normalize(brakeLight(v,n,1/1.5));
-                t = innerIntersection(indx,p,v);
+                t = max(0,innerIntersection(indx,p,v));
                 p = p + t * v;
                 //find new normal
-                n = normalize(-p+objects[indx].xyz);
+                n = normalize(p - objects[indx].xyz);
                 //second out brake light
                 v = normalize(brakeLight(v,n,1.5/1));
                 t = intersection(indx,p,v);
                 p = p + t*v;
                 counter--;
-                //n = normalize(objects[indx].xyz);
-                //float angel1 = dot(n,v) * length(n) * length(v);
-                //vec3 t = (1.0/1.5) * cos(angel1) 
             }
             else{                   // reflective
                 if(objects[indx].w <=0)
