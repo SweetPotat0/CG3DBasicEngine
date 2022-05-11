@@ -4,7 +4,7 @@
 class Assignment2 : public igl::opengl::glfw::Viewer
 {
 	int xResolution, yResolution;
-	float xOldPos, yOldPos, xRel, yRel, xCamPos, yCamPos;
+	float xOldPos, yOldPos, xRel, yRel, xCamRot, yCamRot;
 	bool isPressed;
 	bool isRightPressed;
 	int sourceIndx;

@@ -15,14 +15,14 @@ static void printMat(const Eigen::Matrix4d& mat)
 
 Assignment2::Assignment2()
 {
-	SceneParser("C:\\Users\\guyma\\Desktop\\scene1.txt", &scnData);
+	SceneParser("C:\\Users\\idshi\\Documents\\GitHub\\CG3DBasicEngine\\tutorial\\Assignment2\\scene4.txt", &scnData);
 	xResolution = 800;
 	yResolution = 800;
 	sourceIndx = -1;
 	isRightPressed = false;
 	isPressed = false;
-	xCamPos = 0;
-	yCamPos = 0;
+	xCamRot = 0;
+	yCamRot = 0;
 }
 
 void Assignment2::Init()
@@ -59,7 +59,7 @@ void Assignment2::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& Vie
 	s->SetUniformMat4f("View", View);
 	s->SetUniformMat4f("Model", Model);
 	
-	s->SetUniform2f("posChange", xCamPos, yCamPos);
+	s->SetUniform2f("camRot", xCamRot, yCamRot);
 	s->SetUniform4fv("eye", &scnData.eye, 1);
 	s->SetUniform4fv("ambient", &scnData.ambient, 1);
 	s->SetUniform4fv("objects", &scnData.objects[0], scnData.objects.size());
@@ -92,8 +92,8 @@ void Assignment2::SetPosition(int x, int y)
 		}
 		else
 		{
-			xCamPos += xRel * 2;
-			yCamPos += yRel * 2;
+			scnData.eye[0] += xRel * 2;
+			scnData.eye[1] += yRel * 2;
 		}
 	}
     xOldPos = ((float)x / xResolution);
@@ -126,7 +126,7 @@ void Assignment2::ScaleAllShapes(float amt, int viewportIndx)
 
 float Assignment2::Intersection(Eigen::Vector3f sourcePoint)
 {
-	Eigen::Vector3f v = (sourcePoint - Eigen::Vector3f(scnData.eye[0] + xCamPos, scnData.eye[1] + yCamPos, scnData.eye[2])).normalized();
+	Eigen::Vector3f v = (sourcePoint - Eigen::Vector3f(scnData.eye[0], scnData.eye[1], scnData.eye[2])).normalized();
 	//sourcePoint = sourcePoint + Eigen::Vector3f(scnData.eye[0], scnData.eye[1], scnData.eye[3]);
 	float tmin = 1.0e10;
 	int indx = -1;
@@ -174,10 +174,9 @@ void Assignment2::RotateEye(float amt, bool upDown)
 {
 	float n = scnData.eye.norm();
 	if (upDown)
-		scnData.eye[1] += amt;
+		yCamRot += amt;
 	else
-		scnData.eye[0] += amt;
-	//scnData.eye = scnData.eye.normalized()*n;
+		xCamRot += amt;
 }
 
 Assignment2::~Assignment2(void)

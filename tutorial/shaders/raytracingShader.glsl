@@ -1,6 +1,6 @@
  #version 330 
 
-uniform vec2 posChange;
+uniform vec2 camRot;
 uniform vec4 eye;
 uniform vec4 ambient;
 uniform vec4[20] objects;
@@ -177,9 +177,9 @@ vec3 brakeLight(vec3 v,vec3 n,float myu){
 void main()
 {  
     int indx = -1;
-    vec3 newEye = vec3(eye.x + posChange.x, eye.y + posChange.y, eye.z); 
-    vec3 v = normalize( position0 - newEye);
-    float t = intersection(indx,newEye ,v);
+    vec3 position = vec3(position0.x + eye.x, position0.y + eye.y, position0.z);
+    vec3 v = normalize( position - eye.xyz);
+    float t = intersection(indx,eye.xyz ,v);
     if(indx < 0){
        gl_FragColor = vec4(0.0,1.0,0.0,1.0);
        return;
@@ -188,7 +188,7 @@ void main()
     {
         //mirror
        int counter = 5;
-        vec3 p = newEye + t*v;
+        vec3 p = eye.xyz + t*v;
         vec3 n;
         while(counter>0 && indx<sizes.z + sizes.w) {
             if(indx < 0){
