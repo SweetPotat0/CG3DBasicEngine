@@ -174,15 +174,28 @@ vec3 brakeLight(vec3 v,vec3 n,float myu){
     return sqrt(1-(myu*myu)*(1-(dot(n,v)*dot(n,v))))*n + myu*(v-dot(n,v)*n);
 }
 
-void main()
-{  
-    int indx = -1;
-    vec3 position = vec3(position0.x + eye.x, position0.y + eye.y, position0.z);
+vec4 matMult(vec4[9] first,mat3 second){
+    vec4 ans = vec4(0,0,0,0);
+    for(int i=0; i < 9;i++){
+        ans += first[i] * second[(i/3)][i%3];
+    }
+    return ans;
+
+}
+
+vec4 calcRay(vec3 pos){
+int indx = -1;
+    vec3 position = vec3(pos.x + eye.x, pos.y + eye.y, eye.z - 2.0f);
+
+    // rotation
+    position = position - eye.xyz;
+    position =  (rotationMatrix(vec3(0,1,0), camRot.x) * rotationMatrix(vec3(1,0,0), camRot.y) * vec4(position, 1)).xyz;
+    position = position + eye.xyz;
+    
     vec3 v = normalize( position - eye.xyz);
     float t = intersection(indx,eye.xyz ,v);
     if(indx < 0){
-       gl_FragColor = vec4(0.0,1.0,0.0,1.0);
-       return;
+       return vec4(37.0/255.0, 94.0/ 255.0, 148.0/ 255.0,1.0);
     }
     else
     {
@@ -192,8 +205,7 @@ void main()
         vec3 n;
         while(counter>0 && indx<sizes.z + sizes.w) {
             if(indx < 0){
-                gl_FragColor = vec4(0.0,1.0,0.0,1.0);
-                return;
+                return vec4(37.0/255.0, 94.0/ 255.0, 148.0/ 255.0,1.0);
             }
             else if (indx <= sizes.w) {// transperant
                 n = normalize(objects[indx].xyz - p);
@@ -226,10 +238,25 @@ void main()
         
         //if(objects[indx].w <= 0 && (mod(int(abs(1.5*x)),2) == mod(int(abs(1.5*y)),2)))
         if(objects[indx].w <= 0 && (((mod(int(1.5*x),2) == mod(int(1.5*y),2)) && ((x>0 && y>0) || (x<0 && y<0))) || ((mod(int(1.5*x),2) != mod(int(1.5*y),2) && ((x<0 && y>0) || (x>0 && y<0))))))
-            gl_FragColor = vec4(colorCalc(indx,p,v,0.5),1);
+            return vec4(colorCalc(indx,p,v,0.5),1);
         else 
-            gl_FragColor = vec4(colorCalc(indx,p,v,1.0),1);      
+            return vec4(colorCalc(indx,p,v,1.0),1);      
     }
+}
+
+void main()
+{  
+    vec4[9] colors;
+    float stepConst = 0.001;
+    for(int i = 0; i < 9; i++) {
+        colors[i] = calcRay(position0 + vec3(stepConst* ((i%3)-1),stepConst*int((i/3)-1),0));
+    }
+    mat3 gaussian;
+    gaussian[0] = vec3(1,4,1);
+    gaussian[1] = vec3(4,16,4);
+    gaussian[2] = vec3(1,4,1);
+    gaussian = gaussian*0.02777777;
+    gl_FragColor = matMult(colors,gaussian);
 }
  
 

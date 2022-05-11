@@ -8,7 +8,7 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
 {
     if (action == GLFW_PRESS)
     {
-        std::cout << "prss" << std::endl;
+        
         Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
         Assignment2 *scn = (Assignment2 *)rndr->GetScene();
         double x2, y2;
@@ -95,20 +95,20 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
 
         case GLFW_KEY_UP:
             // rndr->MoveCamera(0, scn->xRotate, 0.05f);
-            scn->RotateEye(0.05f, true);
+            scn->RotateEye(-0.01f, true);
             break;
         case GLFW_KEY_DOWN:
             // scn->shapeTransformation(scn->xGlobalRotate,-5.f);
             // cout<< "down: "<<endl;
-            scn->RotateEye(-0.05f, true);
+            scn->RotateEye(0.01f, true);
             break;
         case GLFW_KEY_LEFT:
-            scn->RotateEye(0.05f, false);
+            scn->RotateEye(-0.01f, false);
             break;
         case GLFW_KEY_RIGHT:
             // scn->shapeTransformation(scn->xGlobalRotate,-5.f);
             // cout<< "down: "<<endl;
-            scn->RotateEye(-0.05f, false);
+            scn->RotateEye(0.01f, false);
             break;
         case GLFW_KEY_U:
             rndr->MoveCamera(0, scn->yTranslate, 0.25f);

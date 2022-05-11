@@ -15,7 +15,7 @@ static void printMat(const Eigen::Matrix4d& mat)
 
 Assignment2::Assignment2()
 {
-	SceneParser("C:\\Users\\idshi\\Documents\\GitHub\\CG3DBasicEngine\\tutorial\\Assignment2\\scene4.txt", &scnData);
+	SceneParser("C:\\Users\\ido\\Documents\\GitHub\\CG3DBasicEngine\\tutorial\\Assignment2\\scene4.txt", &scnData);
 	xResolution = 800;
 	yResolution = 800;
 	sourceIndx = -1;
@@ -40,9 +40,11 @@ void Assignment2::Init()
 	AddMaterial(texIDs + 1, slots + 1, 1);
 
 	AddShape(Plane, -1, TRIANGLES, 0);
+	
 	SetShapeShader(0, 1);
 	SetShapeMaterial(0, 0);
 	SetShapeStatic(0);
+
 
 }
 
@@ -124,10 +126,32 @@ void Assignment2::ScaleAllShapes(float amt, int viewportIndx)
 	}
 }
 
+
+Eigen::Matrix4f rotationMatrix(Eigen::Vector3f axis, float angle)
+{
+	axis = axis.normalized();
+	float s = sin(angle);
+	float c = cos(angle);
+	float oc = 1.0 - c;
+	
+	Eigen::Matrix4f m;
+	m << oc * axis[0] * axis[0] + c, oc* axis[0]* axis[1] - axis[2] * s, oc* axis[2]* axis[0] + axis[1] * s, 0.0,
+		oc* axis[0]* axis[1] + axis[2] * s, oc* axis[1]* axis[1] + c, oc* axis[1]* axis[2] - axis[0] * s, 0.0,
+		oc* axis[2]* axis[0] - axis[1] * s, oc* axis[1]* axis[2] + axis[0] * s, oc* axis[2]* axis[2] + c, 0.0,
+		0.0, 0.0, 0.0, 1.0;
+	return m;
+}
+
 float Assignment2::Intersection(Eigen::Vector3f sourcePoint)
 {
-	Eigen::Vector3f v = (sourcePoint - Eigen::Vector3f(scnData.eye[0], scnData.eye[1], scnData.eye[2])).normalized();
-	//sourcePoint = sourcePoint + Eigen::Vector3f(scnData.eye[0], scnData.eye[1], scnData.eye[3]);
+	sourcePoint = Eigen::Vector3f(scnData.eye[0] + sourcePoint[0], scnData.eye[1] + sourcePoint[1], scnData.eye[2] - 2.0f);
+
+	sourcePoint = sourcePoint - scnData.eye.head(3);
+	Eigen::Vector4f position(sourcePoint[0], sourcePoint[1], sourcePoint[2], 1.0f);
+	position = rotationMatrix(Eigen::Vector3f(0, 1, 0), xCamRot) * rotationMatrix(Eigen::Vector3f(1, 0, 0), yCamRot) * position;
+	sourcePoint = Eigen::Vector3f(position[0], position[1], position[2]) + scnData.eye.head(3);
+
+	Eigen::Vector3f v = (sourcePoint - scnData.eye.head(3)).normalized();
 	float tmin = 1.0e10;
 	int indx = -1;
 	for (int i = 0; i < scnData.sizes[0]; i++) //every object
@@ -173,10 +197,13 @@ float Assignment2::Intersection(Eigen::Vector3f sourcePoint)
 void Assignment2::RotateEye(float amt, bool upDown)
 {
 	float n = scnData.eye.norm();
-	if (upDown)
+	if (upDown) {
 		yCamRot += amt;
-	else
+	}
+	else {
 		xCamRot += amt;
+	}
+
 }
 
 Assignment2::~Assignment2(void)
