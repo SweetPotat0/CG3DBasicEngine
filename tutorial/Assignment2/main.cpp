@@ -12,7 +12,6 @@ int main(int argc, char* argv[])
 	const int infoIndx = 2;
 	std::list<int> x, y;
 	x.push_back(DISPLAY_WIDTH);
-	x.push_back(DISPLAY_WIDTH);
 	y.push_back(DISPLAY_HEIGHT);
 	Display disp = Display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OPENGL");
 	igl::opengl::glfw::imgui::ImGuiMenu* menu = NULL; //new igl::opengl::glfw::imgui::ImGuiMenu();

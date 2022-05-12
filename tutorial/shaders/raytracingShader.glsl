@@ -184,8 +184,8 @@ vec4 matMult(vec4[9] first,mat3 second){
 }
 
 vec4 calcRay(vec3 pos){
-int indx = -1;
-    vec3 position = vec3(pos.x + eye.x, pos.y + eye.y, eye.z - 2.0f);
+    int indx = -1;
+    vec3 position = vec3(pos.x + eye.x, pos.y + eye.y, eye.z - 1.0f);
 
     // rotation
     position = position - eye.xyz;
@@ -207,7 +207,7 @@ int indx = -1;
             if(indx < 0){
                 return vec4(37.0/255.0, 94.0/ 255.0, 148.0/ 255.0,1.0);
             }
-            else if (indx <= sizes.w) {// transperant
+            else if (indx < sizes.w) {// transperant
                 n = normalize(objects[indx].xyz - p);
                 //first in brake light
                 v = normalize(brakeLight(v,n,1/1.5));

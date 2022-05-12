@@ -15,7 +15,7 @@ static void printMat(const Eigen::Matrix4d& mat)
 
 Assignment2::Assignment2()
 {
-	SceneParser("C:\\Users\\ido\\Documents\\GitHub\\CG3DBasicEngine\\tutorial\\Assignment2\\scene4.txt", &scnData);
+	SceneParser("C:\\Users\\ido\\Documents\\GitHub\\CG3DBasicEngine\\tutorial\\Assignment2\\scene5.txt", &scnData);
 	xResolution = 800;
 	yResolution = 800;
 	sourceIndx = -1;
@@ -44,8 +44,6 @@ void Assignment2::Init()
 	SetShapeShader(0, 1);
 	SetShapeMaterial(0, 0);
 	SetShapeStatic(0);
-
-
 }
 
 void Assignment2::Update(const Eigen::Matrix4f& Proj, const Eigen::Matrix4f& View, const Eigen::Matrix4f& Model, unsigned int  shaderIndx, unsigned int shapeIndx)
@@ -144,7 +142,7 @@ Eigen::Matrix4f rotationMatrix(Eigen::Vector3f axis, float angle)
 
 float Assignment2::Intersection(Eigen::Vector3f sourcePoint)
 {
-	sourcePoint = Eigen::Vector3f(scnData.eye[0] + sourcePoint[0], scnData.eye[1] + sourcePoint[1], scnData.eye[2] - 2.0f);
+	sourcePoint = Eigen::Vector3f(scnData.eye[0] + sourcePoint[0], scnData.eye[1] + sourcePoint[1], scnData.eye[2] - 1.0f);
 
 	sourcePoint = sourcePoint - scnData.eye.head(3);
 	Eigen::Vector4f position(sourcePoint[0], sourcePoint[1], sourcePoint[2], 1.0f);
