@@ -3,12 +3,14 @@
 #include "igl/opengl/glfw/Viewer.h"
 #include "ObjectMover.h"
 
-class Layer {
+class Layer
+{
 public:
     bool isVisible;
 };
 
-class SceneShape {
+class SceneShape
+{
 public:
     SceneShape(std::string shapeName, igl::opengl::glfw::Viewer::shapes shapeType,
                std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int index);
@@ -24,6 +26,7 @@ public:
     void setParent(int newParent);
     void addChild(int child);
     void removeChild(int child);
+    std::string getName() { return name; }
     std::vector<int> getChildren();
     bool isTransparent = false;
 
@@ -36,9 +39,4 @@ private:
     Eigen::Vector3f lastDrawnPosition;
     int parent;
     std::vector<int> children;
-
-
-
-
-
 };

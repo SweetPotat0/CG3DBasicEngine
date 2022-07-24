@@ -118,9 +118,9 @@ public:
 
     void AddViewport(int left, int bottom, int width, int height);
 
-    unsigned int AddBuffer(int infoIndx, bool stencil = false);
+    unsigned int AddBuffer(int infoIndx);
 
-    int Create2Dmaterial(int texsNum);
+    int Create2Dmaterial(int infoIndx, int code);
 
     void AddDraw(int viewportIndx, int cameraIndx, int shaderIndx, int buffIndx, unsigned int flags);
 
@@ -146,6 +146,8 @@ public:
 
     inline float GetAngle(int cameraIndx) { return cameras[cameraIndx]->GetAngle(); }
 
+    inline Eigen::Matrix4f GetProjection(int cameraIndex) {return cameras[cameraIndex]->GetViewProjection();}
+
     inline void SetDrawFlag(int infoIndx, unsigned int flag) { drawInfos[infoIndx]->SetFlags(flag); }
 
     inline void ClearDrawFlag(int infoIndx, unsigned int flag) { drawInfos[infoIndx]->ClearFlags(flag); }
@@ -163,6 +165,12 @@ public:
     inline int GetViewportsSize() { return viewports.size(); }
 
     float CalcMoveCoeff(int cameraIndx, int width);
+
+    int getViewPortWidth(int vpIndex){return viewports[vpIndex].z();}
+
+    int getViewPortHeight(int vpIndex){return viewports[vpIndex].w();}
+
+    void SetBuffers();
 
     inline void UpdateZpos(int ypos) { zrel = ypos; }
 
@@ -212,5 +220,6 @@ private:
 
     void Clear(float r, float g, float b, float a, unsigned int flags);
 
+    void SwapDrawInfo(int indx1, int indx2);
 };
 

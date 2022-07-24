@@ -24,10 +24,12 @@ public:
     std::vector<int> GetChildren(int shape);
     void Play();
     float time;
+    std::vector<SceneShape> shapesGlobal;
+    std::vector<int> pickedShapes;
+    int cubeMapIndx = -1;
     float max_time;
 	~Project(void);
 private:
-    std::vector<SceneShape> shapesGlobal;
     Renderer *renderer = nullptr;
     long globalTime;
     SceneShape AddGlobalShape(std::string name, shapes shapeType, std::shared_ptr<ObjectMover> mover,

@@ -84,6 +84,8 @@ void Project::Init()
     SetShapeShader(shp1.getIndex(), 2);
     SetShapeMaterial(shp1.getIndex(), 2);
 
+    //Cube map:
+
     SceneShape cubeMap = AddGlobalShape("cubeMap", Cube, bez, nullptr, -2);
     SetShapeShader(cubeMap.getIndex(), 1);
     SetShapeMaterial(cubeMap.getIndex(), 1);
@@ -91,6 +93,10 @@ void Project::Init()
     selected_data_index = cubeMap.getIndex();
     ShapeTransformation(scaleAll, 150,0);
     SetShapeStatic(cubeMap.getIndex());
+
+    cubeMapIndx = cubeMap.getIndex();
+
+    //End cubeMap
 
     selected_data_index = shp.getIndex();
     animating = true;

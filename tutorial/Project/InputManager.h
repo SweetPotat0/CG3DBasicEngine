@@ -4,14 +4,76 @@
 #include "Project.h"
 #include "imgui/imgui.h"
 
+bool holdsLeft;
+double xStart, yStart;
+
+float normelize(float num, int maxSize)
+{
+    return (((2 * num) / maxSize) - 1);
+}
+
+bool inside(float xStart, float yStart, float xEnd, float yEnd, float screenX, float screenY)
+{
+    if (xStart > xEnd)
+    {
+        float tmp = xStart;
+        xStart = xEnd;
+        xEnd = tmp;
+    }
+    if (yStart > yEnd)
+    {
+        float tmp = yStart;
+        yStart = yEnd;
+        yEnd = tmp;
+    }
+    bool goodX = xStart <= screenX && screenX <= xEnd;
+    bool goodY = yStart <= screenY && screenY <= yEnd;
+    return goodX && goodY;
+}
+// TODO check projection in point Mult scale/ratio
+void handlePicking(double xStart, double yStart, double xEnd, double yEnd, Project *scn, Renderer *rndr)
+{
+    xStart = normelize(xStart, rndr->getViewPortWidth(0));
+    xEnd = normelize(xEnd, rndr->getViewPortWidth(0));
+    yStart = normelize(yStart, rndr->getViewPortHeight(0));
+    yEnd = normelize(yEnd, rndr->getViewPortHeight(0));
+    for (auto shape : scn->pickedShapes)
+    {
+        scn->SetShapeViewport(shape, -3);
+    }
+    scn->pickedShapes.clear();
+    Eigen::Matrix4f projection = rndr->GetProjection(0);
+    for (auto shape : scn->shapesGlobal)
+    {
+        if (shape.getIndex() != scn->cubeMapIndx)
+        {
+            Eigen::Vector3f pos = shape.getPosition(0);
+            Eigen::Vector4f posVec = Eigen::Vector4f(pos.x(), pos.y(), pos.z(), 1);
+            Eigen::Vector4f res = projection * posVec;
+            float screenX, screenY;
+            screenX = res.x();
+            screenY = res.y();
+            if (inside(xStart, yStart, xEnd, yEnd, screenX, screenY))
+            {
+                scn->SetShapeViewport(shape.getIndex(), 2);
+                scn->pickedShapes.push_back(shape.getIndex());
+            }
+        }
+    }
+    std::cout << "Total num of picked shapes: " << scn->pickedShapes.size() << std::endl;
+}
+
 void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
 {
     if (action == GLFW_PRESS)
     {
+        std::cout << "action = press";
         Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
         Project *scn = (Project *)rndr->GetScene();
+        std::cout << rndr->IsPressed();
         if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
+            std::cout << "action = right press\n";
             rndr->Pressed();
             glfwGetCursorPos(window, &xStart, &yStart);
         }
@@ -19,11 +81,15 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
     }
     else
     {
+        std::cout << "in the else\n";
+
         Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
         Project *scn = (Project *)rndr->GetScene();
 
         if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
+            std::cout << "little if \n";
+
             double xEnd, yEnd;
             glfwGetCursorPos(window, &xEnd, &yEnd);
             handlePicking(xStart, yStart, xEnd, yEnd, scn, rndr);
@@ -34,6 +100,7 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
 
 void glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
+    std::cout << "callback 2 was called";
     Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
     Project *scn = (Project *)rndr->GetScene();
 
@@ -52,6 +119,7 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
 {
     Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
     Project *scn = (Project *)rndr->GetScene();
+    double xStart, yStart;
 
     rndr->UpdatePosition((float)xpos, (float)ypos);
 
@@ -59,16 +127,24 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
     {
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
         {
-
-            rndr->MouseProccessing(GLFW_MOUSE_BUTTON_RIGHT);
+            glfwGetCursorPos(window, &xStart, &yStart);
+            if (!rndr->IsPressed())
+            {
+                rndr->Pressed();
+            }
         }
         else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
         {
 
             rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
         }
-        else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && rndr->IsPicked() && rndr->IsMany())
-            rndr->MouseProccessing(GLFW_MOUSE_BUTTON_RIGHT);
+        else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && rndr->IsPressed())
+        {
+            double xEnd, yEnd;
+            glfwGetCursorPos(window, &xEnd, &yEnd);
+            handlePicking(xStart, yStart, xEnd, yEnd, scn, rndr);
+            rndr->Pressed();
+        }
     }
 }
 

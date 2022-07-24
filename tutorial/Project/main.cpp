@@ -1,11 +1,13 @@
 #include "igl/opengl/glfw/renderer.h"
 #include "Project.h"
-#include "./InputManager.h"
+#include "InputManager.h"
+
+
 
 int main(int argc,char *argv[])
 {
-	const int DISPLAY_WIDTH = 1200;
-	const int DISPLAY_HEIGHT = 800;
+    const int DISPLAY_WIDTH = 1200;
+    const int DISPLAY_HEIGHT = 800;
 	const float CAMERA_ANGLE = 45.0f;
 	const float NEAR = 1.0f;
 	const float FAR = 120.0f;
@@ -17,13 +19,33 @@ int main(int argc,char *argv[])
     igl::opengl::glfw::imgui::ImGuiMenu* menu = new igl::opengl::glfw::imgui::ImGuiMenu();
     Renderer* rndr = new Renderer(CAMERA_ANGLE, (float)DISPLAY_WIDTH/(float)DISPLAY_HEIGHT, NEAR, FAR);
 	Project *scn = new Project();  //initializing scene
-	
+
+    scn->SetMenu(menu);
+
+    Eigen::Matrix4f projection = rndr->GetProjection(0);
+    Eigen::Vector4f vec = Eigen::Vector4f(1,1,1,1);
+    std::cout<< projection*vec;
+
     Init(disp,menu); //adding callback functions
 	scn->Init();    //adding shaders, textures, shapes to scene
     rndr->Init(scn,x,y,1,menu); // adding scene and viewports to the renderer
-    disp.SetRenderer(rndr);
     scn->SetRenderer(rndr);
-    scn->SetMenu(menu);
+    disp.SetRenderer(rndr);
+
+    rndr->AddViewport(0,0,DISPLAY_WIDTH,DISPLAY_HEIGHT);
+    rndr->AddViewport(0,0,DISPLAY_WIDTH,DISPLAY_HEIGHT);
+    rndr->CopyDraw(1,rndr->viewport,1);
+    rndr->ClearDrawFlag(2, rndr->toClear | rndr->stencilTest);
+    rndr->SetDrawFlag(2, rndr->blend | rndr->inAction2 | rndr->scissorTest);
+
+// the picking viewport:
+    //first apply the "pickingShader" with a blend that creates a glow over the picked objects
+    rndr->AddDraw(2 , 0, 3, 0,   rndr->blend | rndr->scaleAbit | rndr-> depthTest | rndr->onPicking);
+
+    //second apply the "pickingShader" with a stencil test that creates a frame over the picked objects
+//    rndr->AddDraw(1 , 0, 3, 0,   rndr->stencilTest | rndr->stencil2 | rndr->scaleAbit | rndr-> depthTest | rndr->onPicking);
+
+
 
     disp.launch_rendering(rndr);
 
