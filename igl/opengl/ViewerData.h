@@ -37,6 +37,13 @@ namespace igl
 namespace opengl
 {
 
+class Layer{
+    public:
+        Layer(std::string name,bool isShown):name(name),isShown(isShown){}
+        std::string name = "default";
+        bool isShown = false;
+};
+
 // Forward declaration
 class ViewerCore;
 
@@ -264,6 +271,28 @@ public:
 
   // Enable per-face or per-vertex properties
   bool face_based;
+
+  int camera_split;//0- no split, 1- split-y, 2- split-x
+
+    int cameraScreen1Indx = 0;
+    
+    int cameraScreen2Indx = 0;
+
+    std::vector<std::string> cameras;
+
+    std::string camera_name;
+
+    std::vector<Layer> layers;
+
+    std::string layer_name;
+
+    int material_indx = 0;
+
+    bool play_is_active = false;
+
+    bool isTransparent = false;
+
+    std::vector<bool> selectedShapesTransparent;
 
   // Enable double-sided lighting on faces
   bool double_sided;

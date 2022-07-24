@@ -1,5 +1,7 @@
 #pragma once
 #include "igl/opengl/glfw/Viewer.h"
+#include "SceneShape.h"
+#include "igl/opengl/glfw/renderer.h"
 
 class Project : public igl::opengl::glfw::Viewer
 {
@@ -14,8 +16,23 @@ public:
 	void WhenTranslate();
 	void Animate() override;
 	void ScaleAllShapes(float amt, int viewportIndx);
-	
+    void SetRenderer(Renderer *renderer);
+    void SetParent(int shape, int newParent);
+    int GetParent(int shape);
+    void SetMenu(igl::opengl::glfw::imgui::ImGuiMenu* menu);
+    igl::opengl::glfw::imgui::ImGuiMenu* menu;
+    std::vector<int> GetChildren(int shape);
+    void Play();
+    float time;
+    float max_time;
 	~Project(void);
+private:
+    std::vector<SceneShape> shapesGlobal;
+    Renderer *renderer = nullptr;
+    long globalTime;
+    SceneShape AddGlobalShape(std::string name, shapes shapeType, std::shared_ptr<ObjectMover> mover,
+                   std::shared_ptr<Layer> layer, int parent);
+    bool animating;
 };
 
 
