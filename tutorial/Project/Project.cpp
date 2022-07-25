@@ -1,6 +1,7 @@
 #include "Project.h"
 #include <iostream>
 #include <chrono>
+#include "./igl/file_dialog_open.h"
 
 static void printMat(const Eigen::Matrix4d &mat)
 {
@@ -11,6 +12,34 @@ static void printMat(const Eigen::Matrix4d &mat)
             std::cout << mat(j, i) << " ";
         std::cout << std::endl;
     }
+}
+
+IGL_INLINE void Project::my_open_dialog_load_mesh()
+{
+    std::string fname = igl::file_dialog_open();
+
+    if (fname.length() == 0)
+        return;
+
+    Load_Shape_From_File(fname.c_str());
+}
+
+int indxFile = 0;
+
+bool Project::Load_Shape_From_File(
+    const std::string &mesh_file_name_string)
+{
+    std::vector<Eigen::Vector3f> points = {Eigen::Vector3f(4, 4, 0),
+                                           Eigen::Vector3f(0, 20, 0),
+                                           Eigen::Vector3f(-10, -10, -100),
+                                           Eigen::Vector3f(4, 4, 0)};
+
+    std::shared_ptr<ObjectMoverBezier> bez = std::make_shared<ObjectMoverBezier>(points, 0, 500);
+    SceneShape shape = AddGlobalShapeFromFile("file: " + indxFile++, mesh_file_name_string, bez, nullptr, -1);
+    SetShapeShader(shape.getIndex(), 2);
+    SetShapeMaterial(shape.getIndex(), 2);
+    std::cout << "Load mesh from file: " << mesh_file_name_string << std::endl;
+    return true;
 }
 
 long getCurrentUnixTime()
@@ -30,36 +59,46 @@ void Project::SetMenu(igl::opengl::glfw::imgui::ImGuiMenu *menu)
 //{
 // }
 
+SceneShape Project::AddGlobalShapeFromFile(std::string name, std::string file_name,
+                                           std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int parent)
+{
+    int index = AddShapeFromFile(file_name, parent, TRIANGLES);
+    SceneShape scnShape(name, MeshCopy, mover, layer, index);
+    scnShape.setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
+    shapesGlobal.push_back(scnShape);
+    return scnShape;
+}
+
 SceneShape Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,
-                                   std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int parent)
+                                   std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int parent, int viewPort = 0)
 {
 
-    int index = AddShape(shapeType, parent, TRIANGLES);
+    int index = AddShape(shapeType, parent, TRIANGLES, viewPort);
     SceneShape scnShape(name, shapeType, mover, layer, index);
     scnShape.setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
     shapesGlobal.push_back(scnShape);
     return scnShape;
 }
+
 void Project::Init()
 {
     globalTime = -1;
     unsigned int texIDs[4] = {0, 1, 2, 3};
     unsigned int slots[4] = {0, 1, 2, 3};
-    AddShader("shaders/pickingShader");
-    AddShader("shaders/cubemapShader");
-    AddShader("shaders/basicShader");
-    // AddShader("shaders/pickingShader");
-    AddShader("shaders/basicShader2");
+    int pickingShaderIndx = AddShader("shaders/pickingShader");
+    int cubemapShaderIndx = AddShader("shaders/cubemapShader");
+    int basicShaderIndx = AddShader("shaders/basicShader");
 
-    AddTexture("textures/grass.bmp", 2);
-    AddTexture("textures/cubemaps/Daylight Box_", 3);
-    AddTexture("textures/box0.bmp", 2);
-    // AddTexture("../res/textures/Cat_bump.jpg", 2);
+    unsigned int grassTexIndx = AddTexture("textures/grass.bmp", 2);
+    unsigned int dayLightBoxTexIndx = AddTexture("textures/cubemaps/Daylight Box_", 3);
+    unsigned int boxTexIndx = AddTexture("textures/box0.bmp", 2);
+    unsigned int planeTexIndx = AddTexture("textures/plane.png", 2);
 
-    AddMaterial(texIDs, slots, 1);
-    AddMaterial(texIDs + 1, slots + 1, 1);
-    AddMaterial(texIDs + 2, slots + 2, 1);
-    AddMaterial(texIDs + 3, slots + 3, 1);
+    int grass2DMatIndx = AddMaterial(&grassTexIndx, slots, 1);
+    int dayLight3DMatIndx = AddMaterial(&dayLightBoxTexIndx, slots + 1, 1);
+
+    int box2DMatIndx = AddMaterial(&boxTexIndx, slots + 2, 1);
+    int plane2DMatIndx = AddMaterial(&planeTexIndx, slots + 3, 1);
 
     std::vector<Eigen::Vector3f> points = {Eigen::Vector3f(0, 0, 0),
                                            Eigen::Vector3f(0, 20, 0),
@@ -72,33 +111,51 @@ void Project::Init()
                                               Eigen::Vector3f(0, 0, 0)};
 
     std::shared_ptr<ObjectMoverBezier> bez = std::make_shared<ObjectMoverBezier>(points, 0, 500);
+
+    // Cube map -->
+
+    SceneShape cubeMap = AddGlobalShape("cubeMap", Cube, bez, nullptr, -2);
+    SetShapeShader(cubeMap.getIndex(), cubemapShaderIndx);
+    SetShapeMaterial(cubeMap.getIndex(), dayLight3DMatIndx);
+
+    selected_data_index = cubeMap.getIndex();
+    ShapeTransformation(scaleAll, 150, 0);
+    SetShapeStatic(cubeMap.getIndex());
+
+    cubeMapIndx = cubeMap.getIndex();
+
+    // End cubeMap
+
     SceneShape shp = AddGlobalShape("test", Cube, bez, nullptr, -1);
     shapesGlobal[shp.getIndex()].addMover(std::make_shared<ObjectMoverConstant>(Eigen::Vector3f(0, 0, 0),
                                                                                 500, 50));
     shapesGlobal[shp.getIndex()].addMover(std::make_shared<ObjectMoverBezier>(pointsRev, 550, 500));
 
-    SetShapeShader(shp.getIndex(), 2);
-    SetShapeMaterial(shp.getIndex(), 2);
+    SetShapeShader(shp.getIndex(), basicShaderIndx);
+    SetShapeMaterial(shp.getIndex(), box2DMatIndx);
 
-    SceneShape shp1 = AddGlobalShape("test 1", Cube, bez, nullptr,-1);
-    SetShapeShader(shp1.getIndex(), 2);
-    SetShapeMaterial(shp1.getIndex(), 2);
+    SceneShape shp1 = AddGlobalShape("test 1", Cube, bez, nullptr, -1);
+    SetShapeShader(shp1.getIndex(), basicShaderIndx);
+    SetShapeMaterial(shp1.getIndex(), box2DMatIndx);
 
-    //Cube map:
+    SceneShape shp2 = AddGlobalShape("test 2", Cube, bez, nullptr, -1);
+    SetShapeShader(shp2.getIndex(), basicShaderIndx);
+    SetShapeMaterial(shp2.getIndex(), box2DMatIndx);
 
-    SceneShape cubeMap = AddGlobalShape("cubeMap", Cube, bez, nullptr, -2);
-    SetShapeShader(cubeMap.getIndex(), 1);
-    SetShapeMaterial(cubeMap.getIndex(), 1);
+    // Picking plane -->
 
-    selected_data_index = cubeMap.getIndex();
-    ShapeTransformation(scaleAll, 150,0);
-    SetShapeStatic(cubeMap.getIndex());
+    SceneShape pickingPlane = AddGlobalShape("Picking plane", Plane, bez, nullptr, -2, 1);
+    SetShapeShader(pickingPlane.getIndex(), pickingShaderIndx);
+    SetShapeMaterial(pickingPlane.getIndex(), plane2DMatIndx);
 
-    cubeMapIndx = cubeMap.getIndex();
+    selected_data_index = pickingPlane.getIndex();
+    ShapeTransformation(zTranslate, -1.1, 1);
 
-    //End cubeMap
+    SetShapeStatic(pickingPlane.getIndex());
 
-    selected_data_index = shp.getIndex();
+    // Picking plane End
+
+    selected_data_index = cubeMapIndx;
     animating = true;
 
     // SetShapeViewport(6, 1);
@@ -134,12 +191,12 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
     Eigen::Vector3f newPos = scnShape.getPosition((float)time);
     Eigen::Vector3f delta = newPos - pos;
 
-    pickedShapes = {scnShape.getIndex()};
+    // pickedShapes = {scnShape.getIndex()};
     ShapeTransformation(xTranslate, delta[0], 0);
     ShapeTransformation(yTranslate, delta[1], 0);
     ShapeTransformation(zTranslate, delta[2], 0);
     shapesGlobal[shapeIndx].setlastDrawnPosition(newPos);
-    pickedShapes.clear();
+    // pickedShapes.clear();
 
     s->Bind();
     s->SetUniformMat4f("Proj", Proj);
@@ -172,6 +229,27 @@ void Project::WhenRotate()
 
 void Project::WhenTranslate()
 {
+}
+
+const int numOfCubeMaps = 3;
+
+std::string cubeMaps[numOfCubeMaps] = {"Daylight Box_", "grass_cubemap_",
+                                       "desert_cubemap_"};
+
+int cubeMapCurrTextIndx = 0;
+
+void Project::NextCubeMap()
+{
+    cubeMapCurrTextIndx = (cubeMapCurrTextIndx + 1) % numOfCubeMaps;
+    ChangeCubeMap(cubeMaps[cubeMapCurrTextIndx]);
+}
+
+void Project::ChangeCubeMap(std::string file_name)
+{
+    unsigned int tex = AddTexture("textures/cubemaps/" + file_name, 3);
+    unsigned int numOfMats = materials.size();
+    int cubeMat = AddMaterial(&tex, &numOfMats, 1);
+    SetShapeMaterial(cubeMapIndx, cubeMat);
 }
 
 void Project::Animate()

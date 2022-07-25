@@ -445,7 +445,7 @@ unsigned int Renderer::AddBuffer(int infoIndx)
     unsigned int texId;
     texId = scn->AddTexture(width, height, 0, COLOR);
     scn->AddTexture(width, height, 0, DEPTH);
-    buffers.push_back(new igl::opengl::DrawBuffer(width, height, true, texId));
+    buffers.push_back(new igl::opengl::DrawBuffer(width, height, false, texId));
 
     return texId;
 }

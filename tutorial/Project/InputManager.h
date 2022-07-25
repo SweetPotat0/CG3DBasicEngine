@@ -30,6 +30,22 @@ bool inside(float xStart, float yStart, float xEnd, float yEnd, float screenX, f
     bool goodY = yStart <= screenY && screenY <= yEnd;
     return goodX && goodY;
 }
+
+// Viewport coords, normalized:
+//
+//  -1 -->       0 -->         1
+//  ---------------------------- -1
+//  -                          -
+//  -                          -  |
+//  -                          -  v
+//  -                          -
+//  -                          -  0
+//  -                          -
+//  -                          -  |
+//  -                          -  v
+//  -                          -
+//  ----------------------------  1
+
 // TODO check projection in point Mult scale/ratio
 void handlePicking(double xStart, double yStart, double xEnd, double yEnd, Project *scn, Renderer *rndr)
 {
@@ -37,6 +53,7 @@ void handlePicking(double xStart, double yStart, double xEnd, double yEnd, Proje
     xEnd = normelize(xEnd, rndr->getViewPortWidth(0));
     yStart = normelize(yStart, rndr->getViewPortHeight(0));
     yEnd = normelize(yEnd, rndr->getViewPortHeight(0));
+    std::cout << "(xS,yS): (" << xStart << "," << yStart << "), (xE,yE): (" << xEnd << "," << yEnd << ")" << std::endl;
     for (auto shape : scn->pickedShapes)
     {
         scn->SetShapeViewport(shape, -3);
@@ -45,7 +62,7 @@ void handlePicking(double xStart, double yStart, double xEnd, double yEnd, Proje
     Eigen::Matrix4f projection = rndr->GetProjection(0);
     for (auto shape : scn->shapesGlobal)
     {
-        if (shape.getIndex() != scn->cubeMapIndx)
+        if (shape.getIndex() != scn->cubeMapIndx && shape.getIndex() != 4)
         {
             Eigen::Vector3f pos = shape.getPosition(0);
             Eigen::Vector4f posVec = Eigen::Vector4f(pos.x(), pos.y(), pos.z(), 1);
@@ -67,9 +84,10 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
 {
     if (action == GLFW_PRESS)
     {
-        std::cout << "action = press";
+
         Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
         Project *scn = (Project *)rndr->GetScene();
+        std::cout << "action = press" << scn->pickedShapes.size() << std::endl;
         std::cout << rndr->IsPressed();
         if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
@@ -127,6 +145,7 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
     {
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
         {
+            std::cout << "Pressing right while moving" << std::endl;
             glfwGetCursorPos(window, &xStart, &yStart);
             if (!rndr->IsPressed())
             {
@@ -201,7 +220,9 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
         case GLFW_KEY_L:
             rndr->MoveCamera(0, scn->xTranslate, -0.25f);
             break;
-
+        case GLFW_KEY_K:
+            scn->NextCubeMap();
+            break;
         case GLFW_KEY_R:
             rndr->MoveCamera(0, scn->xTranslate, 0.25f);
             break;

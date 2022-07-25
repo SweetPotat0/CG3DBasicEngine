@@ -159,6 +159,7 @@ namespace igl
 
                 IGL_INLINE void ImGuiMenu::draw_viewer_menu(igl::opengl::glfw::Viewer *viewer, std::vector<igl::opengl::Camera *> &camera, Eigen::Vector4i &viewWindow, std::vector<DrawInfo *> drawInfos)
                 {
+                    Project *scn = ((Project *)viewer);
                     bool *p_open = NULL;
                     static bool no_titlebar = false;
                     static bool no_scrollbar = false;
@@ -210,16 +211,17 @@ namespace igl
                         float p = ImGui::GetStyle().FramePadding.x;
                         if (ImGui::Button("Load##Mesh", ImVec2((w - p) / 2.f, 0)))
                         {
-                            int savedIndx = viewer->selected_data_index;
-                            viewer->open_dialog_load_mesh();
-                            if (viewer->data_list.size() > viewer->parents.size())
-                            {
-                                viewer->parents.push_back(-1);
-                                viewer->data_list.back()->set_visible(false, 1);
-                                viewer->data_list.back()->set_visible(true, 2);
-                                viewer->data_list.back()->show_faces = 3;
-                                viewer->selected_data_index = savedIndx;
-                            }
+                            // int savedIndx = viewer->selected_data_index;
+                            // viewer->open_dialog_load_mesh();
+                            ((Project*)viewer)->my_open_dialog_load_mesh();
+                            // if (viewer->data_list.size() > viewer->parents.size())
+                            // {
+                            //     viewer->parents.push_back(-1);
+                            //     viewer->data_list.back()->set_visible(false, 1);
+                            //     viewer->data_list.back()->set_visible(true, 2);
+                            //     viewer->data_list.back()->show_faces = 3;
+                            //     viewer->selected_data_index = savedIndx;
+                            // }
                         }
                         ImGui::SameLine(0, p);
                         if (ImGui::Button("Save##Mesh", ImVec2((w - p) / 2.f, 0)))
@@ -287,13 +289,13 @@ namespace igl
                                                 &(viewer->data()->layers.at(i)).isShown))
                             {
                                 std::cout << "layer changed:" << (viewer->data()->layers.at(i)).isShown << std::endl;
-                                MenuManager::OnLayerChange((viewer->data()->layers.at(i).name), (viewer->data()->layers.at(i).isShown));
+                                MenuManager::OnLayerChange((viewer->data()->layers.at(i).name), (viewer->data()->layers.at(i).isShown), (Project *)viewer);
                             }
                         }
                         ImGui::InputText("", viewer->data()->layer_name);
                         if (ImGui::Button("Add Layer"))
                         {
-                            MenuManager::OnAddLayer(viewer->data()->layer_name, true);
+                            MenuManager::OnAddLayer(viewer->data()->layer_name, true, (Project *)viewer);
                             viewer->data()->layers.push_back(Layer(viewer->data()->layer_name, true));
                         }
                     }
@@ -312,7 +314,7 @@ namespace igl
                                 {
                                     current_material_item = ("material" + (std::to_string(n))).c_str();
                                     viewer->data()->material_indx = n;
-                                    MenuManager::OnSelectMaterial(n);
+                                    MenuManager::OnSelectMaterial(n, (Project *)viewer);
                                 }
                                 if (is_selected)
                                 {
@@ -325,9 +327,9 @@ namespace igl
 
                         bool isAllTransparent = false;
 
-                        for (size_t i = 0; i < viewer->data()->selectedShapesTransparent.size(); i++)
+                        for (size_t i = 0; i < scn->shapesGlobal.size(); i++)
                         {
-                            if (viewer->data()->selectedShapesTransparent.at(i)== false)
+                            if (scn->shapesGlobal.at(i).isTransparent == false)
                             {
                                 isAllTransparent = false;
                                 break;
@@ -336,11 +338,34 @@ namespace igl
 
                         if (ImGui::Checkbox("Set Transparent", &isAllTransparent))
                         {
-                            for (size_t i = 0; i < viewer->data()->selectedShapesTransparent.size(); i++)
+                            MenuManager::OnTransparentToggled(isAllTransparent, (Project *)viewer);
+                        }
+
+                        ImGui::Text("Set a layer:");
+
+                        // Set layer to picked objects
+
+                        std::string tempLayerSetStr = viewer->data()->layers.at(viewer->data()->layerSetIndex).name;
+                        const char *current_layer_set_item = tempLayerSetStr.c_str();
+                        if (ImGui::BeginCombo("##layers set combo", current_layer_set_item))
+                        {
+                            for (size_t n = 0; n < viewer->data()->layers.size(); n++)
                             {
-                                viewer->data()->selectedShapesTransparent.at(i) = isAllTransparent;
+                                bool is_selected = strcmp(current_layer_set_item, viewer->data()->layers.at(n).name.c_str()) == 0;
+                                // std::cout << "compare: " << std::string(current_layer_set_item) << " with " << ("material" + (std::to_string(n))).c_str() << std::endl;
+                                if (ImGui::Selectable(viewer->data()->layers.at(n).name.c_str(), is_selected))
+                                {
+                                    current_layer_set_item = viewer->data()->layers.at(n).name.c_str();
+                                    viewer->data()->layerSetIndex = n;
+                                    MenuManager::OnSetLayer(viewer->data()->layers.at(n).name, (Project *)viewer);
+                                }
+                                if (is_selected)
+                                {
+                                    ImGui::SetItemDefaultFocus();
+                                }
                             }
-                            MenuManager::OnTransparentToggled(isAllTransparent);
+
+                            ImGui::EndCombo();
                         }
                     }
 
@@ -348,15 +373,15 @@ namespace igl
                     {
                         if (ImGui::RadioButton("No Split", &(viewer->data()->camera_split), 0))
                         {
-                            MenuManager::OnCameraSplitChange(MenuManager::CameraSplitMode::no_split);
+                            MenuManager::OnCameraSplitChange(MenuManager::CameraSplitMode::no_split, (Project *)viewer);
                         }
                         if (ImGui::RadioButton("Split x", &(viewer->data()->camera_split), 1))
                         {
-                            MenuManager::OnCameraSplitChange(MenuManager::CameraSplitMode::split_x);
+                            MenuManager::OnCameraSplitChange(MenuManager::CameraSplitMode::split_x, (Project *)viewer);
                         }
                         if (ImGui::RadioButton("Split y", &(viewer->data()->camera_split), 2))
                         {
-                            MenuManager::OnCameraSplitChange(MenuManager::CameraSplitMode::split_y);
+                            MenuManager::OnCameraSplitChange(MenuManager::CameraSplitMode::split_y, (Project *)viewer);
                         }
 
                         ImGui::Text("Select Camera for screen 1:");
@@ -406,7 +431,7 @@ namespace igl
                         if (ImGui::Button("Add Camera"))
                         {
                             viewer->data()->cameras.push_back(viewer->data()->camera_name);
-                            MenuManager::OnAddCamera(viewer->data()->camera_name);
+                            MenuManager::OnAddCamera(viewer->data()->camera_name, (Project *)viewer);
                         }
                     }
 
@@ -415,7 +440,7 @@ namespace igl
                         if (ImGui::Checkbox("Play Animation", &(viewer->data()->play_is_active)))
                         {
                             viewer->isActive = viewer->data()->play_is_active;
-                            MenuManager::OnPlayChanged(viewer->data()->play_is_active);
+                            MenuManager::OnPlayChanged(viewer->data()->play_is_active, (Project *)viewer);
                             if (viewer->isActive)
                                 viewer->Activate();
                             else

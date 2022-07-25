@@ -1,7 +1,8 @@
+#include "Project.h"
+
 class MenuManager
 {
 public:
-
     enum CameraSplitMode
     {
         no_split,
@@ -9,7 +10,7 @@ public:
         split_y
     };
 
-    static void OnCameraSplitChange(int splitMode)
+    static void OnCameraSplitChange(int splitMode, Project *scn)
     {
         switch (splitMode)
         {
@@ -28,28 +29,33 @@ public:
         }
     }
 
-    static void OnTransparentToggled(bool isTransparent){
-
+    static void OnTransparentToggled(bool isTransparent, Project *scn)
+    {
     }
 
-    static void OnAddCamera(std::string camera_name)
+    static void OnAddCamera(std::string camera_name, Project *scn)
     {
         std::cout << "added camera" << camera_name << std::endl;
     }
 
-    static void OnAddLayer(std::string layer_name, bool is_shown)
+    static void OnAddLayer(std::string layer_name, bool is_shown, Project *scn)
     {
     }
 
-    static void OnLayerChange(std::string layer_name, bool is_shown)
+    static void OnLayerChange(std::string layer_name, bool is_shown, Project *scn)
     {
     }
 
-    static void OnSelectMaterial(int material_inx)
+    static void OnSelectMaterial(int material_inx, Project *scn)
     {
     }
 
-    static void OnPlayChanged(bool play)
+    static void OnPlayChanged(bool play, Project *scn)
     {
+    }
+
+    static void OnSetLayer(std::string layer_name, Project *scn)
+    {
+        std::cout << "Set layer: " << layer_name << ", num of picked: " << scn->pickedShapes.size() << std::endl;
     }
 };

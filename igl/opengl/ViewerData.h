@@ -288,6 +288,8 @@ public:
 
     int material_indx = 0;
 
+    int layerSetIndex = 0;
+
     bool play_is_active = false;
 
     bool isTransparent = false;
