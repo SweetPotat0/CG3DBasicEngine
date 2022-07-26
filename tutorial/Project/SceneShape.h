@@ -3,6 +3,7 @@
 #include "igl/opengl/glfw/Viewer.h"
 #include "ObjectMover.h"
 
+
 class Layer
 {
 public:
@@ -13,7 +14,7 @@ class SceneShape
 {
 public:
     SceneShape(std::string shapeName, igl::opengl::glfw::Viewer::shapes shapeType,
-               std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int index);
+               std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int index, igl::opengl::glfw::Viewer* parentViewer);
     std::shared_ptr<Layer> getLayer();
     void changeLayer(std::shared_ptr<Layer> layer);
     int getIndex();
@@ -29,6 +30,7 @@ public:
     std::string getName() { return name; }
     std::vector<int> getChildren();
     bool isTransparent = false;
+    void moveShape(Eigen::Vector3d moveVal);
 
 private:
     std::string name;
@@ -39,4 +41,5 @@ private:
     Eigen::Vector3f lastDrawnPosition;
     int parent;
     std::vector<int> children;
+    igl::opengl::glfw::Viewer* parentViewer;
 };

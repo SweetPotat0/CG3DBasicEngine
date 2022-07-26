@@ -1,9 +1,9 @@
 #include "SceneShape.h"
 
 SceneShape::SceneShape(std::string shapeName, igl::opengl::glfw::Viewer::shapes shapeType,
-                       std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int index) :
+                       std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int index, igl::opengl::glfw::Viewer* parentViewer) :
                        name(shapeName), type(shapeType), mover(ObjectMoverSplit(mover)),
-                       layer(layer), index(index) {}
+                       layer(layer), index(index), parentViewer(parentViewer) {}
 
 std::shared_ptr<Layer> SceneShape::getLayer() {
     return layer;
@@ -60,6 +60,11 @@ void SceneShape::removeChild(int removedChild) {
             newChildren.push_back(child);
     }
     children = newChildren;
+}
+
+void SceneShape::moveShape(Eigen::Vector3d moveTo) {
+    std::cout<<"____________________________________________"<< index<<std::endl;
+    parentViewer->data(0)->MyTranslate(moveTo,true);
 }
 
 
