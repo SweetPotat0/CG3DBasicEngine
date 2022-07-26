@@ -31,6 +31,27 @@ public:
 
     static void OnTransparentToggled(bool isTransparent, Project *scn)
     {
+        for (size_t i = 0; i < scn->pickedShapes.size(); i++)
+        {
+            int shapeIndx = scn->pickedShapes[i];
+            scn->shapesGlobal[shapeIndx].isTransparent = isTransparent;
+        }
+    }
+
+    static void OnBlurToggled(bool isBlurred, Project *scn)
+    {
+        for (size_t i = 0; i < scn->pickedShapes.size(); i++)
+        {
+            int shapeIndx = scn->pickedShapes[i];
+            if (isBlurred == true)
+            {
+                scn->SetShapeShader(shapeIndx, scn->blurShaderIndx);
+            }
+            else
+            {
+                scn->SetShapeShader(shapeIndx, scn->basicShaderIndx);
+            }
+        }
     }
 
     static void OnAddCamera(std::string camera_name, Project *scn)
@@ -48,6 +69,11 @@ public:
 
     static void OnSelectMaterial(int material_inx, Project *scn)
     {
+        for (size_t i = 0; i < scn->pickedShapes.size(); i++)
+        {
+            int shpIndex = scn->pickedShapes[i];
+            scn->SetShapeMaterial(shpIndex, material_inx);
+        }
     }
 
     static void OnPlayChanged(bool play, Project *scn)

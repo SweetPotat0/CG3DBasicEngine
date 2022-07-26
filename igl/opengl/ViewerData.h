@@ -294,6 +294,8 @@ public:
 
     bool isTransparent = false;
 
+    bool isBlur = false;
+
     std::vector<bool> selectedShapesTransparent;
 
   // Enable double-sided lighting on faces

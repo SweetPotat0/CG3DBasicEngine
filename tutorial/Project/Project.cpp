@@ -87,7 +87,8 @@ void Project::Init()
     unsigned int slots[4] = {0, 1, 2, 3};
     int pickingShaderIndx = AddShader("shaders/pickingShader");
     int cubemapShaderIndx = AddShader("shaders/cubemapShader");
-    int basicShaderIndx = AddShader("shaders/basicShader");
+    basicShaderIndx = AddShader("shaders/basicShader");
+    blurShaderIndx = AddShader("shaders/blurShader");
 
     unsigned int grassTexIndx = AddTexture("textures/grass.bmp", 2);
     unsigned int dayLightBoxTexIndx = AddTexture("textures/cubemaps/Daylight Box_", 3);
@@ -155,7 +156,7 @@ void Project::Init()
 
     // Picking plane End
 
-    selected_data_index = cubeMapIndx;
+    selected_data_index = shp1.getIndex();
     animating = true;
 
     // SetShapeViewport(6, 1);
@@ -202,7 +203,14 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
     s->SetUniformMat4f("Proj", Proj);
     s->SetUniformMat4f("View", View);
     s->SetUniformMat4f("Model", Model);
-    s->SetUniform2f("shapeId", 0, shapeIndx);
+    if (shapesGlobal[shapeIndx].isTransparent)
+    {
+        s->SetUniform2f("isTransparent", 1, 0);
+    }
+    else
+    {
+        s->SetUniform2f("isTransparent", 0, 0);
+    }
     if (data_list[shapeIndx]->GetMaterial() >= 0 && !materials.empty())
     {
         //		materials[shapes[pickedShape]->GetMaterial()]->Bind(textures);

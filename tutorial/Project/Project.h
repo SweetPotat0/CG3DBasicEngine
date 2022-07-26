@@ -28,6 +28,8 @@ public:
     std::vector<SceneShape> shapesGlobal;
     std::vector<int> pickedShapes;
     int cubeMapIndx = -1;
+    int blurShaderIndx = -1;
+    int basicShaderIndx = -1;
     float max_time;
     ~Project(void);
     void ChangeCubeMap(std::string file_name);

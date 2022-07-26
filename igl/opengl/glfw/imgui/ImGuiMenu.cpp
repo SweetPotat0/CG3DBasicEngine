@@ -325,20 +325,26 @@ namespace igl
                             ImGui::EndCombo();
                         }
 
-                        bool isAllTransparent = false;
+                        bool isAllTransparent = true;
 
-                        for (size_t i = 0; i < scn->shapesGlobal.size(); i++)
+                        for (size_t i = 0; i < scn->pickedShapes.size(); i++)
                         {
-                            if (scn->shapesGlobal.at(i).isTransparent == false)
+                            int pickedIndx = scn->pickedShapes[i];
+                            if (scn->shapesGlobal.at(pickedIndx).isTransparent == false)
                             {
                                 isAllTransparent = false;
                                 break;
                             }
-                        }
+                        }                        
 
                         if (ImGui::Checkbox("Set Transparent", &isAllTransparent))
                         {
                             MenuManager::OnTransparentToggled(isAllTransparent, (Project *)viewer);
+                        }
+
+                        if (ImGui::Checkbox("Set Blur", &viewer->data()->isBlur))
+                        {
+                            MenuManager::OnBlurToggled(viewer->data()->isBlur, (Project *)viewer);
                         }
 
                         ImGui::Text("Set a layer:");

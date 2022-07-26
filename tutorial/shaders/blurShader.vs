@@ -11,14 +11,19 @@ out vec2 texCoord0;
 out vec3 normal0;
 out vec3 color0;
 out vec3 position0;
+out float r;
+out float sigma;
+out vec2 texResolution;
 
-uniform vec2 shapeId;
 uniform mat4 Proj;
 uniform mat4 View;
 uniform mat4 Model;
 
 void main()
 {
+    texResolution = vec2(256,256);
+    r = 10;
+    sigma = 6;
 	texCoord0 = texcoord;    
 	color0 = vec3(Ka);
 	normal0 = (Model  * vec4(normal, 0.0)).xyz;
