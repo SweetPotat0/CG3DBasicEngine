@@ -1,9 +1,8 @@
-#pragma once   //maybe should be static class
+#pragma once // maybe should be static class
 #include "igl/opengl/glfw/Display.h"
 #include "igl/opengl/glfw/renderer.h"
 #include "Project.h"
 #include "imgui/imgui.h"
-
 
 float normelize(float num, int maxSize)
 {
