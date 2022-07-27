@@ -152,7 +152,7 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
         else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
         {
 
-//            rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
+            rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
         }
         else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && rndr->IsPressed())
         {
