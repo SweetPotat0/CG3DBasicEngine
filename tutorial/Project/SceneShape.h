@@ -6,7 +6,7 @@
 #include "igl/opengl/glfw/Viewer.h"
 
 enum directions{
-    x,y,z
+    x,y,z,w
 };
 
 class Layer {
@@ -16,6 +16,7 @@ public:
 
 class SceneShape {
 public:
+    void SceneShape::Scale(double shiftSize, directions d);
     SceneShape(std::string shapeName, igl::opengl::glfw::Viewer::shapes shapeType,
                std::shared_ptr<Layer> layer, int index, igl::opengl::glfw::Viewer* viewer);
     std::shared_ptr<Layer> getLayer();

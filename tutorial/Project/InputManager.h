@@ -13,6 +13,37 @@ float normelize(float num, int maxSize)
     return (((2 * num) / maxSize) - 1);
 }
 
+// Zoom in objects
+Eigen::Vector3f FindCenterOfPickedObjects(Project *scn)
+{
+    float zoomInCenter = 4;
+    int shapesCount = scn->pShapes.size();
+
+    if (shapesCount > 0)
+    {
+
+        Eigen::Vector3f averagePos = Eigen::Vector3f(0, 0, 0);
+
+        for (int shapeIndex : scn->pShapes)
+        { // chaneg to picked shapes
+            averagePos += scn->shapesGlobal[shapeIndex].getCurrentPosition();
+        }
+        averagePos /= shapesCount;
+        averagePos -= Eigen::Vector3f(0, 0, zoomInCenter);
+
+        return averagePos;
+    }
+    return Eigen::Vector3f(0, 0, 0);
+}
+
+void scalePickedObjects(double shiftSize, directions d, Project *scn)
+{
+    for (int i : scn->pShapes)
+    {
+        scn->shapesGlobal[i].Scale(shiftSize, d);
+    }
+}
+
 bool inside(float xStart, float yStart, float xEnd, float yEnd, float screenX, float screenY)
 {
     if (xStart > xEnd)
@@ -32,26 +63,6 @@ bool inside(float xStart, float yStart, float xEnd, float yEnd, float screenX, f
     return goodX && goodY;
 }
 
-
-// Zoom in objects
-Eigen::Vector3f FindCenterOfPickedObjects(Project* scn) {
-
-    int shapesCount = scn->pickedShapes.size();
-    if (shapesCount > 0) {
-        float xVals = 0;
-        float yVals = 0;
-        float zVals = 0;
-        for (auto shape : scn->shapesGlobal) { // chaneg to picked shapes
-            Eigen::Vector3f shapePos = shape.getPosition(0);
-            xVals += shapePos.x();
-            yVals += shapePos.y();
-            zVals += shapePos.z();
-        }
-        return Eigen::Vector3f(xVals / shapesCount, yVals / shapesCount, zVals / shapesCount);
-    }
-    return Eigen::Vector3f(0, 0, 0);
-}
-
 // Viewport coords, normalized:
 //
 //  -1 -->       0 -->         1
@@ -68,7 +79,7 @@ Eigen::Vector3f FindCenterOfPickedObjects(Project* scn) {
 //  ----------------------------  1
 
 // TODO check projection in point Mult scale/ratio
-//float xAngleShit(Renderer* rnd){
+// float xAngleShit(Renderer* rnd){
 //    float angle = rnd->getCameraAngle(0, x);
 //    float near = rnd->getCameraNear(0);
 //    if (angle<0){
@@ -77,7 +88,7 @@ Eigen::Vector3f FindCenterOfPickedObjects(Project* scn) {
 //    return near * tan(angle);
 //}
 //
-//float yAngleShit(Renderer* rnd){
+// float yAngleShit(Renderer* rnd){
 //    float angle = rnd->getCameraAngle(0, y);
 //    float near = rnd->getCameraNear(0);
 //    if (angle<0){
@@ -86,10 +97,40 @@ Eigen::Vector3f FindCenterOfPickedObjects(Project* scn) {
 //    return near * tan(angle);
 //}
 
-
-void movePickedObjects(double shiftSize, directions d ,Project* scn){
-    for ( int i : scn->pShapes) {
-        scn->shapesGlobal[i].move(shiftSize,d);
+void movePickedObjects(double shiftSize, directions d, Project *scn)
+{
+    for (int i : scn->pShapes)
+    {
+        scn->shapesGlobal[i].move(shiftSize, d);
+        // void handlePicking(double xStart, double yStart, double xEnd, double yEnd, Project *scn, Renderer *rndr)
+        // {
+        //     xStart = normelize(xStart, rndr->getViewPortWidth(0));
+        //     xEnd = normelize(xEnd, rndr->getViewPortWidth(0));
+        //     yStart = normelize(yStart, rndr->getViewPortHeight(0));
+        //     yEnd = normelize(yEnd, rndr->getViewPortHeight(0));
+        //     std::cout << "(xS,yS): (" << xStart << "," << yStart << "), (xE,yE): (" << xEnd << "," << yEnd << ")" << std::endl;
+        //     for (auto shape : scn->pickedShapes)
+        //     {
+        //         scn->SetShapeViewport(shape, -3);
+        //     }
+        //     scn->pickedShapes.clear();
+        //     Eigen::Matrix4f projection = rndr->GetProjection(0);
+        //     for (auto shape : scn->shapesGlobal)
+        //     {
+        //         if (shape.getIndex() != scn->cubeMapIndx && shape.getIndex() != scn->pickingPlaneIndx)
+        //         {
+        //             Eigen::Vector3f pos = shape.getPosition(0);
+        //             Eigen::Vector4f posVec = Eigen::Vector4f(pos.x(), pos.y(), pos.z(), 1);
+        //             Eigen::Vector4f res = projection * posVec;
+        //             float screenX, screenY;
+        //             screenX = res.x();
+        //             screenY = res.y();
+        //             if (inside(xStart, yStart, xEnd, yEnd, screenX, screenY))
+        //             {
+        //                 scn->SetShapeViewport(shape.getIndex(), 3);
+        //                 scn->pickedShapes.push_back(shape.getIndex());
+        //             }
+        //         }
     }
 }
 
@@ -221,17 +262,17 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
             rndr->MoveCamera(0, scn->yTranslate, 0.25f);
             break;
         case GLFW_KEY_D:
-//            rndr->MoveCamera(0, scn->yTranslate, -0.25f);
-            movePickedObjects(0.02,x,scn);
+            //            rndr->MoveCamera(0, scn->yTranslate, -0.25f);
+            movePickedObjects(0.02, x, scn);
             break;
         case GLFW_KEY_A:
-            movePickedObjects(-0.02,x,scn);
+            movePickedObjects(-0.02, x, scn);
             break;
         case GLFW_KEY_W:
-            movePickedObjects(0.02,y,scn);
+            movePickedObjects(0.02, y, scn);
             break;
         case GLFW_KEY_S:
-            movePickedObjects(-0.02,y,scn);
+            movePickedObjects(-0.02, y, scn);
             break;
         case GLFW_KEY_L:
             rndr->MoveCamera(0, scn->xTranslate, -0.25f);
@@ -249,23 +290,53 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
         case GLFW_KEY_F:
             rndr->MoveCamera(0, scn->zTranslate, -0.5f);
             break;
-        case GLFW_KEY_O: {
-            Eigen::Vector3f center = FindCenterOfPickedObjects(scn);
+        case GLFW_KEY_T:
+        {
             rndr->MoveCamera(0, 100, 0);
-            //rndr->TranslateCamera(center);
-            /*if (!scn->pickedShapes.empty())
-                std::cout << scn->pickedShapes.front() << std::endl;*/
-            //rndr->MoveCamera(0, scn->zTranslate, -0.5f);
             break;
         }
+        case GLFW_KEY_O:
+        {
+            Eigen::Vector3f center = FindCenterOfPickedObjects(scn);
+            rndr->MoveCamera(0, 100, 0);
+            rndr->MoveCamera(0, scn->xTranslate, center.x());
+            rndr->MoveCamera(0, scn->yTranslate, center.y());
+            rndr->MoveCamera(0, scn->zTranslate, center.z());
+            /*if (!scn->pickedShapes.empty())
+                std::cout << scn->pickedShapes.front() << std::endl;*/
+            // rndr->MoveCamera(0, scn->zTranslate, -0.5f);
+            break;
+        }
+        case GLFW_KEY_X:
+            movePickedObjects(+0.02, z, scn);
+            break;
+        case GLFW_KEY_Z:
+            movePickedObjects(-0.02, z, scn);
+            break;
         case GLFW_KEY_1:
-            movePickedObjects(0.02,z,scn);
+            scalePickedObjects(1.1, x, scn);
             break;
         case GLFW_KEY_2:
-            movePickedObjects(-0.02,z,scn);
+            scalePickedObjects(0.9, x, scn);
             break;
         case GLFW_KEY_3:
-            scn->selected_data_index = 3;
+            scalePickedObjects(1.1, y, scn);
+            break;
+        case GLFW_KEY_4:
+            scalePickedObjects(0.9, y, scn);
+            break;
+        case GLFW_KEY_5:
+            scalePickedObjects(1.1, z, scn);
+            break;
+        case GLFW_KEY_6:
+            scalePickedObjects(0.9, z, scn);
+            break;
+        case GLFW_KEY_EQUAL:
+            scalePickedObjects(1.1, w, scn);
+            break;
+        case GLFW_KEY_MINUS:
+            std::cout << "minus" << std::endl;
+            scalePickedObjects(0.9, w, scn);
             break;
         default:
             break;

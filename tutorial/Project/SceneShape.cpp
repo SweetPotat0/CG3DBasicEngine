@@ -4,55 +4,58 @@
 
 #include "SceneShape.h"
 
-
-
 SceneShape::SceneShape(std::string shapeName, igl::opengl::glfw::Viewer::shapes shapeType,
-                       std::shared_ptr<Layer> layer, int index,igl::opengl::glfw::Viewer* viewer) :
-        name(shapeName), type(shapeType),
-        layer(layer), index(index), currentPosition(Eigen::Vector3f(0, 0, 0)),viewer(viewer){
+                       std::shared_ptr<Layer> layer, int index, igl::opengl::glfw::Viewer *viewer) : name(shapeName), type(shapeType),
+                                                                                                     layer(layer), index(index), currentPosition(Eigen::Vector3f(0, 0, 0)), viewer(viewer)
+{
     movement = std::vector<Eigen::Vector4f>();
-    NextPlaceIndex= 0;
+    NextPlaceIndex = 0;
 }
 
-std::shared_ptr<Layer> SceneShape::getLayer() {
+std::shared_ptr<Layer> SceneShape::getLayer()
+{
     return layer;
 }
-void SceneShape::changeLayer(std::shared_ptr<Layer> layer) {
+void SceneShape::changeLayer(std::shared_ptr<Layer> layer)
+{
     this->layer = layer;
 }
-int SceneShape::getIndex() {
+int SceneShape::getIndex()
+{
     return index;
 }
 
 void SceneShape::addPlaces(Eigen::Vector3f pos)
 {
-    this->movement.push_back(Eigen::Vector4f(pos.x(),pos.y(),pos.z(),NextPlaceIndex));
+    this->movement.push_back(Eigen::Vector4f(pos.x(), pos.y(), pos.z(), NextPlaceIndex));
     this->NextPlaceIndex++;
 }
 
+// bool SceneShape::isDrawn(float time) {
+//     return isDrawnAt(time);
+// }
 
-//bool SceneShape::isDrawn(float time) {
-//    return isDrawnAt(time);
-//}
+// Eigen::Vector3f SceneShape::getPosition(float time) {
+//     return mover.getPosition(time);
+// }
 
-//Eigen::Vector3f SceneShape::getPosition(float time) {
-//    return mover.getPosition(time);
-//}
-
-Eigen::Vector3f SceneShape::getlastDrawnPosition() {
+Eigen::Vector3f SceneShape::getlastDrawnPosition()
+{
     return lastDrawnPosition;
 }
 
-void SceneShape::setlastDrawnPosition(Eigen::Vector3f pos) {
+void SceneShape::setlastDrawnPosition(Eigen::Vector3f pos)
+{
     lastDrawnPosition = pos;
 }
 
-//void SceneShape::addMover(std::shared_ptr<ObjectMover> mover) {
-//    this->mover.addMover(mover);
+// void SceneShape::addMover(std::shared_ptr<ObjectMover> mover) {
+//     this->mover.addMover(mover);
 //
-//}
+// }
 
-SceneShape* SceneShape::getParent() {
+SceneShape *SceneShape::getParent()
+{
     return parent;
 }
 
@@ -60,25 +63,26 @@ void SceneShape::removeParent()
 {
     currentPosition = getCurrentPositionAt(0);
     parent = nullptr;
-
 }
 
-//void SceneShape::removeChild()
+// void SceneShape::removeChild()
 //{
-//    children = nullptr;
-//}
+//     children = nullptr;
+// }
 
-void SceneShape::setParent(SceneShape* newParent) {
+void SceneShape::setParent(SceneShape *newParent)
+{
     parent = newParent;
     currentPosition = currentPosition - newParent->getCurrentPosition();
     parent->addChild(this);
 }
 
-std::vector<SceneShape*> SceneShape::getChildren() {
+std::vector<SceneShape *> SceneShape::getChildren()
+{
     return children;
 }
 
-//TODO: ò÷åîú áéâééééäää
+// TODO: ò÷åîú áéâééééäää
 Eigen::Vector3f SceneShape::getCurrentPositionAt(float time)
 {
     if (parent == nullptr)
@@ -87,74 +91,99 @@ Eigen::Vector3f SceneShape::getCurrentPositionAt(float time)
         return (getPosition(time) + this->parent->getCurrentPositionAt(time));
 }
 
-Eigen::Vector3f SceneShape::getCurrentPosition() {
+Eigen::Vector3f SceneShape::getCurrentPosition()
+{
     return currentPosition;
 }
 
 void SceneShape::removePlace(int index)
 {
-    for (int i = 0 ; i< movement.size(); i++)
+    for (int i = 0; i < movement.size(); i++)
         if (index == movement[i].w())
-            this->movement.erase(movement.begin()+i);
+            this->movement.erase(movement.begin() + i);
 }
 
-void SceneShape::addChild(SceneShape* child) {
+void SceneShape::addChild(SceneShape *child)
+{
     children.push_back(child);
 }
 
-void SceneShape::removeChild(SceneShape* removedChild) {
-    std::vector<SceneShape*> newChildren;
-    for (SceneShape* child : children) {
+void SceneShape::removeChild(SceneShape *removedChild)
+{
+    std::vector<SceneShape *> newChildren;
+    for (SceneShape *child : children)
+    {
         if (child != removedChild)
             newChildren.push_back(child);
     }
     children = newChildren;
 }
 
-///move object
+/// move object
 
-
-
-
-
-
-int BinomialCoefficient(const int n, const int k) {
+int BinomialCoefficient(const int n, const int k)
+{
     if (k == 0)
         return 1;
     std::vector<int> aSolutions(k);
     aSolutions[0] = n - k + 1;
 
-    for (int i = 1; i < k; ++i) {
+    for (int i = 1; i < k; ++i)
+    {
         aSolutions[i] = aSolutions[i - 1] * (n - k + 1 + i) / (i + 1);
     }
 
     return aSolutions[k - 1];
 }
-Eigen::Vector3f SceneShape::getPosition(float time) {
+Eigen::Vector3f SceneShape::getPosition(float time)
+{
     float n = this->movement.size();
     Eigen::Vector3f pos = Eigen::Vector3f(0, 0, 0);
-    for (std::size_t i = 0; i < n; i++) {
-        pos +=  BinomialCoefficient(n, i) * pow((1 - time), n - i) * pow(time, i) * Eigen::Vector3f(movement[i].x(),movement[i].y(),movement[i].z());
+    for (std::size_t i = 0; i < n; i++)
+    {
+        pos += BinomialCoefficient(n, i) * pow((1 - time), n - i) * pow(time, i) * Eigen::Vector3f(movement[i].x(), movement[i].y(), movement[i].z());
     }
     return pos;
 }
 
-void SceneShape::move(double shiftSize,directions d) {
-    switch (d) {
-        case x:
-            viewer->data_list[getIndex()]->MyTranslate(Eigen::Vector3d(shiftSize, 0 , 0) , false);
-            currentPosition += Eigen::Vector3f(shiftSize, 0 , 0);
-            break;
+void SceneShape::move(double shiftSize, directions d)
+{
+    switch (d)
+    {
+    case x:
+        viewer->data_list[getIndex()]->MyTranslate(Eigen::Vector3d(shiftSize, 0, 0), false);
+        currentPosition += Eigen::Vector3f(shiftSize, 0, 0);
+        break;
 
-        case y:
-            viewer->data_list[getIndex()]->MyTranslate(Eigen::Vector3d(0, shiftSize, 0), false);
-            currentPosition += Eigen::Vector3f(0, shiftSize, 0);
-            break;
+    case y:
+        viewer->data_list[getIndex()]->MyTranslate(Eigen::Vector3d(0, shiftSize, 0), false);
+        currentPosition += Eigen::Vector3f(0, shiftSize, 0);
+        break;
 
-        case z:
-            viewer->data_list[getIndex()]->MyTranslate(Eigen::Vector3d(0 , 0 , shiftSize) , false);
-            currentPosition += Eigen::Vector3f(0 , 0 , shiftSize);
-            break;
+    case z:
+        viewer->data_list[getIndex()]->MyTranslate(Eigen::Vector3d(0, 0, shiftSize), false);
+        currentPosition += Eigen::Vector3f(0, 0, shiftSize);
+        break;
+    }
+}
 
+void SceneShape::Scale(double shiftSize, directions d)
+{
+    switch (d)
+    {
+    case x:
+        viewer->data_list[getIndex()]->MyScale(Eigen::Vector3d(shiftSize, 1, 1));
+        break;
+    case y:
+        viewer->data_list[getIndex()]->MyScale(Eigen::Vector3d(1, shiftSize, 1));
+        break;
+
+    case z:
+        viewer->data_list[getIndex()]->MyScale(Eigen::Vector3d(1, 1, shiftSize));
+        break;
+
+    case w:
+        viewer->data_list[getIndex()]->MyScale(Eigen::Vector3d(shiftSize, shiftSize, shiftSize));
+        break;
     }
 }

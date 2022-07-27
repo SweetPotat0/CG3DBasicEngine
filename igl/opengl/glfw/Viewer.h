@@ -155,7 +155,6 @@ public:
 	std::vector<int> parents;
     std::vector<Texture*> textures;
     std::vector<Material*> materials;
-    std::list<int> pickedShapes;
     Eigen::Vector3d pickedNormal;
     int selected_data_index;
     int next_data_id;
@@ -224,7 +223,7 @@ public:
       void ShapeTransformation(int type, float amt, int mode);
 
       virtual bool Picking(unsigned char data[4], int newViewportIndx);
-      inline void UnPick() { selected_data_index = -1; pickedShapes.clear(); }
+      inline void UnPick() { selected_data_index = -1; pShapes.clear(); }
 
       bool load_mesh_from_data(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F, const Eigen::MatrixXd &UV_V,
                                const Eigen::MatrixXi &UV_F);
