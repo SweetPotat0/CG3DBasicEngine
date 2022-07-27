@@ -86,8 +86,4 @@ public:
         std::cout << "Set layer: " << layer_name << ", num of picked: " << scn->pShapes.size() << std::endl;
     }
 
-    static void OnSetFar(Project *scn, float far)
-    {
-        scn->far = far;
-    }
 };
