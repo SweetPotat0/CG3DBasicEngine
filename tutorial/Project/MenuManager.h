@@ -31,18 +31,18 @@ public:
 
     static void OnTransparentToggled(bool isTransparent, Project *scn)
     {
-        for (size_t i = 0; i < scn->pickedShapes.size(); i++)
+        for (size_t i = 0; i < scn->pShapes.size(); i++)
         {
-            int shapeIndx = scn->pickedShapes[i];
+            int shapeIndx = scn->pShapes[i];
             scn->shapesGlobal[shapeIndx].isTransparent = isTransparent;
         }
     }
 
     static void OnBlurToggled(bool isBlurred, Project *scn)
     {
-        for (size_t i = 0; i < scn->pickedShapes.size(); i++)
+        for (size_t i = 0; i < scn->pShapes.size(); i++)
         {
-            int shapeIndx = scn->pickedShapes[i];
+            int shapeIndx = scn->pShapes[i];
             if (isBlurred == true)
             {
                 scn->SetShapeShader(shapeIndx, scn->blurShaderIndx);
@@ -69,9 +69,9 @@ public:
 
     static void OnSelectMaterial(int material_inx, Project *scn)
     {
-        for (size_t i = 0; i < scn->pickedShapes.size(); i++)
+        for (size_t i = 0; i < scn->pShapes.size(); i++)
         {
-            int shpIndex = scn->pickedShapes[i];
+            int shpIndex = scn->pShapes[i];
             scn->SetShapeMaterial(shpIndex, material_inx);
         }
     }
@@ -83,6 +83,6 @@ public:
 
     static void OnSetLayer(std::string layer_name, Project *scn)
     {
-        std::cout << "Set layer: " << layer_name << ", num of picked: " << scn->pickedShapes.size() << std::endl;
+        std::cout << "Set layer: " << layer_name << ", num of picked: " << scn->pShapes.size() << std::endl;
     }
 };

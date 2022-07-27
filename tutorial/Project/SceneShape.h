@@ -35,6 +35,7 @@ public:
     std::vector<SceneShape*> getChildren();
     Eigen::Vector3f getCurrentPositionAt(float time);
     Eigen::Vector3f getCurrentPosition();
+    bool isTransparent = false;
     void removePlace(int index);
     // from mover
     Eigen::Vector3f getpoints(float time);

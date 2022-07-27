@@ -26,7 +26,6 @@ public:
     void Play();
     float time = 0;
     std::vector<SceneShape> shapesGlobal;
-    std::vector<int> pickedShapes;
     int cubeMapIndx = -1;
     int blurShaderIndx = -1;
     int basicShaderIndx = -1;
@@ -34,10 +33,10 @@ public:
     ~Project(void);
     void ChangeCubeMap(std::string file_name);
     void NextCubeMap();
+    long globalTime;
 
 private:
     Renderer *renderer = nullptr;
-    long globalTime;
     SceneShape AddGlobalShapeFromFile(std::string name, std::string file_name,
                                        std::shared_ptr<Layer> layer, int parent, Viewer* viewer);
     SceneShape AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,

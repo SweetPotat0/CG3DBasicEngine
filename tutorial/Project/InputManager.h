@@ -168,7 +168,6 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
             double xEnd, yEnd;
             glfwGetCursorPos(window, &xEnd, &yEnd);
             rndr->PickMany(2);
-            scn->pickedShapes = scn->pShapes;
             rndr->Pressed();
         }
     }

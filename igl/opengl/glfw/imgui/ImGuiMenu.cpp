@@ -327,9 +327,9 @@ namespace igl
 
                         bool isAllTransparent = true;
 
-                        for (size_t i = 0; i < scn->pickedShapes.size(); i++)
+                        for (size_t i = 0; i < scn->pShapes.size(); i++)
                         {
-                            int pickedIndx = scn->pickedShapes[i];
+                            int pickedIndx = scn->pShapes[i];
                             if (scn->shapesGlobal.at(pickedIndx).isTransparent == false)
                             {
                                 isAllTransparent = false;
