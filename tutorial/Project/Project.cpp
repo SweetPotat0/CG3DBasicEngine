@@ -79,8 +79,11 @@ SceneShape Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::
     return scnShape;
 }
 
+
 void Project::Init()
 {
+    far = 3;
+    farShapes = std::vector<int>();
     globalTime = -1;
     unsigned int texIDs[4] = {0, 1, 2, 3};
     unsigned int slots[4] = {0, 1, 2, 3};
@@ -165,10 +168,30 @@ void Project::Init()
     //	ReadPixel(); //uncomment when you are reading from the z-buffer
 }
 
+float Project::calculateCameraDistance(SceneShape shp) {
+    Eigen::Vector3f cameraPos = renderer->cameraPos;
+    Eigen::Vector3f shapePos = shp.getCurrentPosition();
+    return (shapePos-cameraPos).norm();
+}
+
+void Project::updateFarShapes(){
+    for (int indx : farShapes) {
+        SetShapeShader(indx,basicShaderIndx);
+    }
+    farShapes.clear();
+    for(SceneShape shp : shapesGlobal){
+        float dist = calculateCameraDistance(shp);
+        if(dist > far){
+            SetShapeShader(shp.getIndex(),blurShaderIndx);
+            farShapes.push_back(shp.getIndex());
+        }
+    }
+}
+
 void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, const Eigen::Matrix4f &Model, unsigned int shaderIndx, unsigned int shapeIndx)
 {
 
-
+    updateFarShapes();
     ++globalTime;
     Shader *s = shaders[shaderIndx];
     long ctime;
@@ -309,3 +332,9 @@ void Project::Play()
     animating = !animating;
     globalTime = -1;
 }
+
+Renderer *Project::GetRenderer() {
+    return renderer;
+}
+
+

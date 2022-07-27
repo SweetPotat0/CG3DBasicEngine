@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
 
     rndr->AddViewport(-1, 1, DISPLAY_WIDTH, DISPLAY_HEIGHT);
     rndr->AddViewport(-1, 1, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    rndr->AddViewport(-1,1,DISPLAY_WIDTH,DISPLAY_HEIGHT);
     rndr->CopyDraw(1, rndr->viewport, 1);
     rndr->ClearDrawFlag(2, rndr->toClear | rndr->stencilTest);
     rndr->SetDrawFlag(2, rndr->blend | rndr->inAction2 | rndr->scissorTest);
@@ -39,6 +40,7 @@ int main(int argc, char *argv[])
     // the picking viewport:
     // first apply the "pickingShader" with a blend that creates a glow over the picked objects
     rndr->AddDraw(2, 0, 3, 0, rndr->blend | rndr->scaleAbit | rndr->depthTest | rndr->onPicking);
+    rndr->AddDraw(3,0,4,0,rndr->blend);
 
     // second apply the "pickingShader" with a stencil test that creates a frame over the picked objects
     //    rndr->AddDraw(1 , 0, 3, 0,   rndr->stencilTest | rndr->stencil2 | rndr->scaleAbit | rndr-> depthTest | rndr->onPicking);
