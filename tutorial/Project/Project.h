@@ -27,6 +27,7 @@ public:
     float time = 0;
     std::vector<SceneShape> shapesGlobal;
     int cubeMapIndx = -1;
+    int pickingPlaneIndx = -1;
     int blurShaderIndx = -1;
     int basicShaderIndx = -1;
     float max_time = 1;
@@ -38,8 +39,8 @@ public:
 
 private:
     Renderer *renderer = nullptr;
-    SceneShape AddGlobalShapeFromFile(std::string name, std::string file_name, int parent, Viewer* viewer);
-    SceneShape AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,Viewer* viewer, int parent, int viewPort );
+    int AddGlobalShapeFromFile(std::string name, std::string file_name, int parent, Viewer* viewer);
+    int AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType, Viewer* viewer, int parent, int viewPort);
 
     bool animating;
 };

@@ -25,22 +25,54 @@ private:
     std::vector<int> layerShapes;
 };
 
+class BizMovment {
+public:
+    BizMovment(std::vector<Eigen::Vector3f> movement, float start_time, float end_time) :
+        points(movement), start_time(start_time), end_time(end_time) {};
+    std::vector<Eigen::Vector3f> points;
+    float start_time;
+    float end_time;
+    Eigen::Vector3f getPosition(float time) {
+        size_t n = points.size();
+        if (n == 1)
+            return points[0];
+        float normalizedTime = (time - start_time) / (end_time - start_time);
+        Eigen::Vector3f pos = Eigen::Vector3f(0, 0, 0);
+        for (std::size_t i = 0; i < n; i++) {
+            pos += BinomialCoefficient(n, i) * pow((1-normalizedTime), n-i) * pow(normalizedTime, i) * points[i];
+        }
+        return pos;
+    };
+
+private:
+    int BinomialCoefficient(const int n, const int k) {
+        if (k == 0)
+            return 1;
+        std::vector<int> aSolutions(k);
+        aSolutions[0] = n - k + 1;
+
+        for (int i = 1; i < k; ++i) {
+            aSolutions[i] = aSolutions[i - 1] * (n - k + 1 + i) / (i + 1);
+        }
+
+        return aSolutions[k - 1];
+    }
+};
+
 class SceneShape {
 public:
-    void SceneShape::Scale(double shiftSize, directions d);
     SceneShape(std::string shapeName, igl::opengl::glfw::Viewer::shapes shapeType,
-                Layer* layer, int index, igl::opengl::glfw::Viewer* viewer);
+        Layer* layer, int index, igl::opengl::glfw::Viewer* viewer);
     Layer* getLayer();
     void changeLayer(Layer* layer);
     int getIndex();
-    void addPlaces(Eigen::Vector3f pos);
-    bool isDrawn(float time);
+    void addBiz(BizMovment biz, float *max_time);
     Eigen::Vector3f getPosition(float time);
     Eigen::Vector3f getlastDrawnPosition();
     void setlastDrawnPosition(Eigen::Vector3f pos);
+    std::string getName() { return name; };
     SceneShape* getParent();
     void removeParent();
-    void removeChild();
     void setParent(SceneShape* newParent);
     void addChild(SceneShape* child);
     void removeChild(SceneShape* child);
@@ -48,31 +80,22 @@ public:
     Eigen::Vector3f getCurrentPositionAt(float time);
     Eigen::Vector3f getCurrentPosition();
     bool isTransparent = false;
-    void removePlace(int index);
-    // from mover
-    Eigen::Vector3f getpoints(float time);
+    void SceneShape::Scale(double shiftSize, directions d);
 
     //edit mode movment:
     void move(double shiftSize,directions d);
 
-
 private:
     std::string name;
     igl::opengl::glfw::Viewer::shapes type;
-    std::vector<Eigen::Vector4f> movement;
+    std::vector<BizMovment> movement;
     Eigen::Vector3f currentPosition;
     igl::opengl::glfw::Viewer* viewer;
-    //ObjectMoverSplit mover;
     Layer* layer;
     int index;
-     Eigen::Vector3f lastDrawnPosition;
+    Eigen::Vector3f lastDrawnPosition;
     SceneShape* parent;
-    int NextPlaceIndex;
     std::vector<SceneShape*> children;
-    float startTime;
-    float endTime;
-
-
 
 
 };
