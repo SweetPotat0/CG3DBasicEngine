@@ -22,8 +22,7 @@ int main(int argc, char *argv[])
     scn->SetMenu(menu);
 
     Eigen::Matrix4f projection = rndr->GetProjection(0);
-    Eigen::Vector4f vec = Eigen::Vector4f(1, 1, 1, 1);
-    std::cout << projection * vec;
+
 
     Init(disp, menu);               // adding callback functions
     scn->Init();                    // adding shaders, textures, shapes to scene
@@ -31,8 +30,8 @@ int main(int argc, char *argv[])
     scn->SetRenderer(rndr);
     disp.SetRenderer(rndr);
 
-    rndr->AddViewport(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-    rndr->AddViewport(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    rndr->AddViewport(-1, 1, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    rndr->AddViewport(-1, 1, DISPLAY_WIDTH, DISPLAY_HEIGHT);
     rndr->CopyDraw(1, rndr->viewport, 1);
     rndr->ClearDrawFlag(2, rndr->toClear | rndr->stencilTest);
     rndr->SetDrawFlag(2, rndr->blend | rndr->inAction2 | rndr->scissorTest);

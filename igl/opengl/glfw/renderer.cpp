@@ -45,6 +45,8 @@ Renderer::Renderer(float angle, float relationWH, float near, float far)
     zrel = 0;
     currentViewport = 0;
     isPicked = false;
+    cameraPos = Eigen::Vector3d(0, 0, -10);
+    cameraNormal = Eigen::Vector3d(0,0,1);
 }
 
 
@@ -221,7 +223,7 @@ void Renderer::AddCamera(const Eigen::Vector3d& pos, float fov, float relationWH
         drawInfos[infoIndx]->SetCamera(cameras.size());
     }
     cameras.push_back(new igl::opengl::Camera(fov, relationWH, zNear, zFar));
-    cameras.back()->MyTranslate(pos, false);
+//    cameras.back()->MyTranslate(pos, false);
 }
 
 void Renderer::AddViewport(int left, int bottom, int width, int height)
@@ -366,24 +368,30 @@ IGL_INLINE void Renderer::post_resize(GLFWwindow* window, int w, int h)
 	}
 
 
+
 void Renderer::MoveCamera(int cameraIndx, int type, float amt)
 {
     switch (type)
     {
         case xTranslate:
             cameras[cameraIndx]->MyTranslate( Eigen::Vector3d(amt, 0, 0),1); //MakeTransNoScale was here
+            cameraPos += Eigen::Vector3d(amt, 0, 0);
             break;
         case yTranslate:
             cameras[cameraIndx]->MyTranslate( Eigen::Vector3d(0, amt, 0),1); //MakeTransNoScale was here
+            cameraPos += Eigen::Vector3d(0, amt, 0);
             break;
         case zTranslate:
             cameras[cameraIndx]->MyTranslate(Eigen::Vector3d(0, 0, amt),1); //MakeTransNoScale was here
+            cameraPos += Eigen::Vector3d(0,0, amt);
             break;
         case xRotate:
             cameras[cameraIndx]->MyRotate(Eigen::Vector3d(1, 0, 0), amt);
+            cameraXAngle += amt;
             break;
         case yRotate:
             cameras[cameraIndx]->RotateInSystem(Eigen::Vector3d(0, 1, 0), amt);
+            cameraYAngle += amt;
             break;
         case zRotate:
             cameras[cameraIndx]->MyRotate(Eigen::Vector3d(0, 0, 1), amt);
@@ -391,6 +399,25 @@ void Renderer::MoveCamera(int cameraIndx, int type, float amt)
         case scaleAll:
             cameras[cameraIndx]->MyScale( Eigen::Vector3d(amt, amt,  amt));
             break;
+        case 100: {
+
+
+            cameras[cameraIndx]->MyTranslate(Eigen::Vector3d(-cameraPos.x(), -cameraPos.y(), -cameraPos.z()),1);//MakeTransNoScale was here
+            std::cout<<"x: "<< cameraPos.x()<<" y: "<<cameraPos.y()<<" z: "<<cameraPos.z();
+
+            cameras[cameraIndx]->MyRotate(Eigen::Vector3d(1, 0, 0),-cameraXAngle);
+            cameras[cameraIndx]->MyRotate(Eigen::Vector3d(0, 1, 0),-cameraYAngle);
+
+
+            cameraPos = Eigen::Vector3d(0,0,0);
+            cameraNormal = Eigen::Vector3d(0,0,1);
+            cameraYAngle=0;
+            cameraXAngle=0;
+
+            std::cout<<"x: "<< cameraPos.x()<<" y: "<<cameraPos.y()<<" z: "<<cameraPos.z();
+
+            break;
+        }
         default:
             break;
     }
@@ -525,6 +552,12 @@ IGL_INLINE void Renderer::Init(igl::opengl::glfw::Viewer* scene, std::list<int>x
             menu->draw_viewer_menu(scn,cameras,temp, drawInfos);
         };
     }
+}
+
+
+
+float Renderer::getCameraNear(int index) {
+    return cameras[index]->_near;
 }
 
 

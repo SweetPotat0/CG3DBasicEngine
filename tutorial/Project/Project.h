@@ -37,9 +37,9 @@ private:
     Renderer *renderer = nullptr;
     long globalTime;
     SceneShape AddGlobalShapeFromFile(std::string name, std::string file_name,
-                                      std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int parent, Viewer* viewer);
+                                       std::shared_ptr<Layer> layer, int parent, Viewer* viewer);
     SceneShape AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,
-                              std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer,Viewer* viewer, int parent, int viewPort );
+                               std::shared_ptr<Layer> layer,Viewer* viewer, int parent, int viewPort );
 
     bool animating;
 };

@@ -329,11 +329,11 @@ namespace igl
 
                         for (size_t i = 0; i < scn->shapesGlobal.size(); i++)
                         {
-                            if (scn->shapesGlobal.at(i).isTransparent == false)
-                            {
-                                isAllTransparent = false;
-                                break;
-                            }
+//                            if (scn->shapesGlobal.at(i).isTransparent == false)
+//                            {
+//                                isAllTransparent = false;
+//                                break;
+//                            }
                         }
 
                         if (ImGui::Checkbox("Set Transparent", &isAllTransparent))

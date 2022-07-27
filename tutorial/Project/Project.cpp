@@ -34,8 +34,7 @@ bool Project::Load_Shape_From_File(
                                            Eigen::Vector3f(-10, -10, -100),
                                            Eigen::Vector3f(4, 4, 0)};
 
-    std::shared_ptr<ObjectMoverBezier> bez = std::make_shared<ObjectMoverBezier>(points, 0, 500);
-    SceneShape shape = AddGlobalShapeFromFile("file: " + indxFile++, mesh_file_name_string, bez, nullptr, -1, this);
+    SceneShape shape = AddGlobalShapeFromFile("file: " + indxFile++, mesh_file_name_string,  nullptr, -1, this);
     SetShapeShader(shape.getIndex(), 2);
     SetShapeMaterial(shape.getIndex(), 2);
     std::cout << "Load mesh from file: " << mesh_file_name_string << std::endl;
@@ -60,22 +59,21 @@ void Project::SetMenu(igl::opengl::glfw::imgui::ImGuiMenu *menu)
 // }
 
 SceneShape Project::AddGlobalShapeFromFile(std::string name, std::string file_name,
-                                           std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int parent, Viewer* viewer)
+                                            std::shared_ptr<Layer> layer, int parent, Viewer* viewer)
 {
     int index = AddShapeFromFile(file_name, parent, TRIANGLES);
-    SceneShape scnShape(name, MeshCopy, mover, layer, index, viewer);
+    SceneShape scnShape(name, MeshCopy, layer, index, viewer);
     scnShape.setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
     shapesGlobal.push_back(scnShape);
     return scnShape;
 }
 
 SceneShape Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,
-                                   std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer,Viewer* viewer, int parent, int viewPort = 0 )
+                                    std::shared_ptr<Layer> layer,Viewer* viewer, int parent, int viewPort = 0 )
 {
 
     int index = AddShape(shapeType, parent, TRIANGLES, viewPort);
-    std::cout<<"shapeIndex:"<<index<<std::endl;
-    SceneShape scnShape(name, shapeType, mover, layer, index, viewer);
+    SceneShape scnShape(name, shapeType, layer, index, viewer);
     scnShape.setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
     shapesGlobal.push_back(scnShape);
     return scnShape;
@@ -111,11 +109,11 @@ void Project::Init()
                                               Eigen::Vector3f(0, 20, 0),
                                               Eigen::Vector3f(0, 0, 0)};
 
-    std::shared_ptr<ObjectMoverBezier> bez = std::make_shared<ObjectMoverBezier>(points, 0, 500);
+
 
     // Cube map -->
 
-    SceneShape cubeMap = AddGlobalShape("cubeMap", Cube, bez, nullptr, this ,  -2 );
+    SceneShape cubeMap = AddGlobalShape("cubeMap", Cube,  nullptr, this ,  -2 );
     SetShapeShader(cubeMap.getIndex(), cubemapShaderIndx);
     SetShapeMaterial(cubeMap.getIndex(), dayLight3DMatIndx);
 
@@ -127,28 +125,29 @@ void Project::Init()
 
     // End cubeMap
 
-    SceneShape shp = AddGlobalShape("test", Cube, bez, nullptr, this, -1);
+    SceneShape shp = AddGlobalShape("test", Cube,  nullptr, this, -1);
     SetShapeShader(shp.getIndex(), basicShaderIndx);
     SetShapeMaterial(shp.getIndex(), box2DMatIndx);
 
 
-    SceneShape shp1 = AddGlobalShape("test 1", Cube, bez, nullptr,this,  -1);
+    SceneShape shp1 = AddGlobalShape("test 1", Cube,  nullptr,this,  -1);
     SetShapeShader(shp1.getIndex(), basicShaderIndx);
     SetShapeMaterial(shp1.getIndex(), box2DMatIndx);
 
 
-    SceneShape shp2 = AddGlobalShape("test 2", Cube, bez, nullptr,this,  -1);
+    SceneShape shp2 = AddGlobalShape("test 2", Cube,  nullptr,this,  -1);
     SetShapeShader(shp2.getIndex(), basicShaderIndx);
     SetShapeMaterial(shp2.getIndex(), box2DMatIndx);
-//    data(2)->MyTranslate(Eigen::Vector3d(100,100,100), 1);
+
+    shapesGlobal[1].move(5,x);
+    shapesGlobal[2].move(2,y);
+//    shapesGlobal[3].move(-1,y);
+
+
     // Picking plane -->
 
-    for (int i =0;i<4;i++){
-        std::cout<<"this is the shape::::   "<<data(i)<<std::endl;
-    }
 
-
-    SceneShape pickingPlane = AddGlobalShape("Picking plane", Plane, bez, nullptr,this, -2, 1);
+    SceneShape pickingPlane = AddGlobalShape("Picking plane", Plane,  nullptr,this, -2, 1);
     SetShapeShader(pickingPlane.getIndex(), pickingShaderIndx);
     SetShapeMaterial(pickingPlane.getIndex(), plane2DMatIndx);
 
@@ -168,10 +167,7 @@ void Project::Init()
 
 void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, const Eigen::Matrix4f &Model, unsigned int shaderIndx, unsigned int shapeIndx)
 {
-    data_list[2]->MyTranslate(Eigen::Vector3d(-0.002,0,0),false);
 
-    data_list[1]->MyTranslate(Eigen::Vector3d(0,0.002,0),false);
-    data_list[3]->MyTranslate(Eigen::Vector3d(0.002,0,0),false);
 
     ++globalTime;
     if (globalTime == 100)
@@ -200,13 +196,13 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
     Eigen::Vector3f delta = newPos - pos;
 
     // pickedShapes = {scnShape.getIndex()};
-    if(shapeIndx != 0 && shapeIndx != 3){
-//        selected_data_index = shapeIndx;
-        ShapeTransformation(xTranslate, 2, 0);
-        ShapeTransformation(yTranslate, 2, 0);
-        ShapeTransformation(zTranslate, 2, 0);
-        shapesGlobal[shapeIndx].setlastDrawnPosition(newPos);
-    }
+//    if(shapeIndx != 0 && shapeIndx != 3){
+////        selected_data_index = shapeIndx;
+//        ShapeTransformation(xTranslate, 2, 0);
+//        ShapeTransformation(yTranslate, 2, 0);
+//        ShapeTransformation(zTranslate, 2, 0);
+//        shapesGlobal[shapeIndx].setlastDrawnPosition(newPos);
+//    }
 
     // pickedShapes.clear();
 
@@ -266,7 +262,6 @@ void Project::ChangeCubeMap(std::string file_name)
 
 void Project::Animate()
 {
-    std::cout<<"is active:\n"<<isActive;
     if (isActive)
     {
         if (selected_data_index > 0)
@@ -298,19 +293,21 @@ void Project::SetRenderer(Renderer *renderer)
 
 void Project::SetParent(int shape, int newParent)
 {
-    shapesGlobal[shapesGlobal[shape].getParent()].removeChild(shape);
-    shapesGlobal[shape].setParent(newParent);
-    shapesGlobal[newParent].addChild(shape);
+//    shapesGlobal[shapesGlobal[shape].getParent()].removeChild(shape);
+//    shapesGlobal[shape].setParent(newParent);
+//    shapesGlobal[newParent].addChild(shape);
 }
 
 int Project::GetParent(int shape)
 {
-    return shapesGlobal[shape].getParent();
+//    return shapesGlobal[shape].getParent();
+    return 1;
 }
 
 std::vector<int> Project::GetChildren(int shape)
 {
-    return shapesGlobal[shape].getChildren();
+//    return shapesGlobal[shape].getChildren();
+    return std::vector<int>();
 }
 
 void Project::Play()

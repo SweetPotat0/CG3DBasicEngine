@@ -3,6 +3,7 @@
 #include "igl/opengl/glfw/renderer.h"
 #include "Project.h"
 #include "imgui/imgui.h"
+#include "SceneShape.h"
 
 bool holdsLeft;
 double xStart, yStart;
@@ -31,6 +32,26 @@ bool inside(float xStart, float yStart, float xEnd, float yEnd, float screenX, f
     return goodX && goodY;
 }
 
+
+// Zoom in objects
+Eigen::Vector3f FindCenterOfPickedObjects(Project* scn) {
+
+    int shapesCount = scn->pickedShapes.size();
+    if (shapesCount > 0) {
+        float xVals = 0;
+        float yVals = 0;
+        float zVals = 0;
+        for (auto shape : scn->shapesGlobal) { // chaneg to picked shapes
+            Eigen::Vector3f shapePos = shape.getPosition(0);
+            xVals += shapePos.x();
+            yVals += shapePos.y();
+            zVals += shapePos.z();
+        }
+        return Eigen::Vector3f(xVals / shapesCount, yVals / shapesCount, zVals / shapesCount);
+    }
+    return Eigen::Vector3f(0, 0, 0);
+}
+
 // Viewport coords, normalized:
 //
 //  -1 -->       0 -->         1
@@ -47,13 +68,33 @@ bool inside(float xStart, float yStart, float xEnd, float yEnd, float screenX, f
 //  ----------------------------  1
 
 // TODO check projection in point Mult scale/ratio
+//float xAngleShit(Renderer* rnd){
+//    float angle = rnd->getCameraAngle(0, x);
+//    float near = rnd->getCameraNear(0);
+//    if (angle<0){
+//        return -near * tan(abs(angle));
+//    }
+//    return near * tan(angle);
+//}
+//
+//float yAngleShit(Renderer* rnd){
+//    float angle = rnd->getCameraAngle(0, y);
+//    float near = rnd->getCameraNear(0);
+//    if (angle<0){
+//        return -near * tan(abs(angle));
+//    }
+//    return near * tan(angle);
+//}
+
+
+
 void handlePicking(double xStart, double yStart, double xEnd, double yEnd, Project *scn, Renderer *rndr)
 {
     xStart = normelize(xStart, rndr->getViewPortWidth(0));
     xEnd = normelize(xEnd, rndr->getViewPortWidth(0));
     yStart = normelize(yStart, rndr->getViewPortHeight(0));
     yEnd = normelize(yEnd, rndr->getViewPortHeight(0));
-    std::cout << "(xS,yS): (" << xStart << "," << yStart << "), (xE,yE): (" << xEnd << "," << yEnd << ")" << std::endl;
+//    std::cout << "(xS,yS): (" << xStart << "," << yStart << "), (xE,yE): (" << xEnd << "," << yEnd << ")" << std::endl;
     for (auto shape : scn->pickedShapes)
     {
         scn->SetShapeViewport(shape, -3);
@@ -64,12 +105,13 @@ void handlePicking(double xStart, double yStart, double xEnd, double yEnd, Proje
     {
         if (shape.getIndex() != scn->cubeMapIndx && shape.getIndex() != 4)
         {
-            Eigen::Vector3f pos = shape.getPosition(0);
+            Eigen::Vector3f pos = shape.getCurrentPosition();
             Eigen::Vector4f posVec = Eigen::Vector4f(pos.x(), pos.y(), pos.z(), 1);
-            Eigen::Vector4f res = projection * posVec;
+            Eigen::Vector4f res =  projection * posVec;
             float screenX, screenY;
-            screenX = res.x();
-            screenY = res.y();
+            screenX = res.x() /10;
+            screenY = -res.y()/10;
+            std::cout<<"x: "<<screenX<<"y: "<<screenY<<std::endl;
             if (inside(xStart, yStart, xEnd, yEnd, screenX, screenY))
             {
                 scn->SetShapeViewport(shape.getIndex(), 2);
@@ -77,7 +119,12 @@ void handlePicking(double xStart, double yStart, double xEnd, double yEnd, Proje
             }
         }
     }
-    std::cout << "Total num of picked shapes: " << scn->pickedShapes.size() << std::endl;
+}
+
+void movePickedObjects(double shiftSize, directions d ,Project* scn){
+    for ( int i : scn->pickedShapes) {
+        scn->shapesGlobal[i].move(shiftSize,d);
+    }
 }
 
 void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
@@ -87,11 +134,8 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
 
         Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
         Project *scn = (Project *)rndr->GetScene();
-        std::cout << "action = press" << scn->pickedShapes.size() << std::endl;
-        std::cout << rndr->IsPressed();
         if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
-            std::cout << "action = right press\n";
             rndr->Pressed();
             glfwGetCursorPos(window, &xStart, &yStart);
         }
@@ -99,15 +143,11 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
     }
     else
     {
-        std::cout << "in the else\n";
-
         Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
         Project *scn = (Project *)rndr->GetScene();
 
         if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
-            std::cout << "little if \n";
-
             double xEnd, yEnd;
             glfwGetCursorPos(window, &xEnd, &yEnd);
             handlePicking(xStart, yStart, xEnd, yEnd, scn, rndr);
@@ -118,7 +158,6 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
 
 void glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
-    std::cout << "callback 2 was called";
     Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
     Project *scn = (Project *)rndr->GetScene();
 
@@ -145,7 +184,6 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
     {
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
         {
-            std::cout << "Pressing right while moving" << std::endl;
             glfwGetCursorPos(window, &xStart, &yStart);
             if (!rndr->IsPressed())
             {
@@ -209,13 +247,23 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
         case GLFW_KEY_RIGHT:
             // scn->shapeTransformation(scn->xGlobalRotate,-5.f);
             // cout<< "down: "<<endl;
-            rndr->MoveCamera(0, scn->yRotate, -0.05f);
+            rndr->MoveCamera(0, scn->yRotate, -0.5f);
             break;
         case GLFW_KEY_U:
             rndr->MoveCamera(0, scn->yTranslate, 0.25f);
             break;
         case GLFW_KEY_D:
-            rndr->MoveCamera(0, scn->yTranslate, -0.25f);
+//            rndr->MoveCamera(0, scn->yTranslate, -0.25f);
+            movePickedObjects(0.02,x,scn);
+            break;
+        case GLFW_KEY_A:
+            movePickedObjects(-0.02,x,scn);
+            break;
+        case GLFW_KEY_W:
+            movePickedObjects(0.02,y,scn);
+            break;
+        case GLFW_KEY_S:
+            movePickedObjects(-0.02,y,scn);
             break;
         case GLFW_KEY_L:
             rndr->MoveCamera(0, scn->xTranslate, -0.25f);
@@ -233,16 +281,22 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
         case GLFW_KEY_F:
             rndr->MoveCamera(0, scn->zTranslate, -0.5f);
             break;
+        case GLFW_KEY_O: {
+            Eigen::Vector3f center = FindCenterOfPickedObjects(scn);
+            rndr->MoveCamera(0, 100, 0);
+            //rndr->TranslateCamera(center);
+            /*if (!scn->pickedShapes.empty())
+                std::cout << scn->pickedShapes.front() << std::endl;*/
+            //rndr->MoveCamera(0, scn->zTranslate, -0.5f);
+            break;
+        }
         case GLFW_KEY_1:
-            std::cout << "picked 1\n";
-            scn->selected_data_index = 1;
+            movePickedObjects(0.02,z,scn);
             break;
         case GLFW_KEY_2:
-            std::cout << "picked 2\n";
-            scn->selected_data_index = 2;
+            movePickedObjects(-0.02,z,scn);
             break;
         case GLFW_KEY_3:
-            std::cout << "picked 3\n";
             scn->selected_data_index = 3;
             break;
         default:
