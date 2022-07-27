@@ -45,8 +45,8 @@ Renderer::Renderer(float angle, float relationWH, float near, float far)
     zrel = 0;
     currentViewport = 0;
     isPicked = false;
-    cameraPos = Eigen::Vector3d(0, 0, -10);
-    cameraNormal = Eigen::Vector3d(0,0,1);
+    cameraPos = Eigen::Vector3f(0, 0, -10);
+    cameraNormal = Eigen::Vector3f(0,0,1);
 }
 
 
@@ -375,23 +375,25 @@ void Renderer::MoveCamera(int cameraIndx, int type, float amt)
     {
         case xTranslate:
             cameras[cameraIndx]->MyTranslate( Eigen::Vector3d(amt, 0, 0),1); //MakeTransNoScale was here
-            cameraPos += Eigen::Vector3d(amt, 0, 0);
+            cameraPos += Eigen::Vector3f(amt, 0, 0);
             break;
         case yTranslate:
             cameras[cameraIndx]->MyTranslate( Eigen::Vector3d(0, amt, 0),1); //MakeTransNoScale was here
-            cameraPos += Eigen::Vector3d(0, amt, 0);
+            cameraPos += Eigen::Vector3f(0, amt, 0);
             break;
         case zTranslate:
             cameras[cameraIndx]->MyTranslate(Eigen::Vector3d(0, 0, amt),1); //MakeTransNoScale was here
-            cameraPos += Eigen::Vector3d(0,0, amt);
+            cameraPos += Eigen::Vector3f(0,0, amt);
             break;
         case xRotate:
             cameras[cameraIndx]->MyRotate(Eigen::Vector3d(1, 0, 0), amt);
             cameraXAngle += amt;
+            updateNormalX(amt);
             break;
         case yRotate:
             cameras[cameraIndx]->RotateInSystem(Eigen::Vector3d(0, 1, 0), amt);
             cameraYAngle += amt;
+            updateNormalY(amt);
             break;
         case zRotate:
             cameras[cameraIndx]->MyRotate(Eigen::Vector3d(0, 0, 1), amt);
@@ -409,8 +411,8 @@ void Renderer::MoveCamera(int cameraIndx, int type, float amt)
             cameras[cameraIndx]->MyRotate(Eigen::Vector3d(0, 1, 0),-cameraYAngle);
 
 
-            cameraPos = Eigen::Vector3d(0,0,0);
-            cameraNormal = Eigen::Vector3d(0,0,1);
+            cameraPos = Eigen::Vector3f(0,0,0);
+            cameraNormal = Eigen::Vector3f(0,0,1);
             cameraYAngle=0;
             cameraXAngle=0;
 
@@ -558,6 +560,45 @@ IGL_INLINE void Renderer::Init(igl::opengl::glfw::Viewer* scene, std::list<int>x
 
 float Renderer::getCameraNear(int index) {
     return cameras[index]->_near;
+}
+
+void Renderer::updateNormalY(float theta) {
+    Eigen::Matrix<float,4,4> ma;
+    ma << cos(theta), 0.0f, sin(theta), 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            -sin(theta), 0.0f, cos(theta), 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f;
+    Eigen::Vector4f n = Eigen::Vector4f(cameraNormal.x(), cameraNormal.y(),cameraNormal.z(),1);
+     n =  ma * n;
+     cameraNormal = Eigen::Vector3f(n.x(),n.y(),n.z());
+     std::cout<<"in x normal   X: "<< cameraNormal.x()<<"Y : "<<cameraNormal.y()<<" Z: "<<cameraNormal.z()<<std::endl;
+
+
+}
+
+void Renderer::updateNormalX(float theta) {
+    Eigen::Matrix<float, 4, 4> ma;
+    ma << 1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, cos(theta), -sin(theta), 0.0f,
+            0.0f, sin(theta),cos(theta), 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f;
+    Eigen::Vector4f n = Eigen::Vector4f(cameraNormal.x(), cameraNormal.y(),cameraNormal.z(),1);
+    n =  ma * n;
+    cameraNormal = Eigen::Vector3f(n.x(),n.y(),n.z());
+    std::cout<<"in y normal    X: "<< cameraNormal.x()<<" Y : "<<cameraNormal.y()<<" Z: "<<cameraNormal.z()<<std::endl;
+}
+
+Eigen::Vector2f Renderer::calculatePlaneIntersection(Eigen::Vector3f p) {
+    float near = cameras[0]->GetNear();
+    Eigen::Vector3f p0 = Eigen::Vector3f(cameraPos.x(),cameraPos.y(),cameraPos.z());
+    Eigen::Vector3f Q0 =  p0 + near*cameraNormal;
+    Eigen::Vector3f V = p-p0;
+    Eigen::Vector3f normal = (-cameraNormal).normalized();
+    float t = normal.dot(Q0-p0)/normal.dot(V);
+    Eigen::Vector3f point = p0 + t*V;
+
+
+    return Eigen::Vector2f();
 }
 
 

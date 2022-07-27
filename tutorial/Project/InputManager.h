@@ -87,42 +87,8 @@ Eigen::Vector3f FindCenterOfPickedObjects(Project* scn) {
 //}
 
 
-
-void handlePicking(double xStart, double yStart, double xEnd, double yEnd, Project *scn, Renderer *rndr)
-{
-    xStart = normelize(xStart, rndr->getViewPortWidth(0));
-    xEnd = normelize(xEnd, rndr->getViewPortWidth(0));
-    yStart = normelize(yStart, rndr->getViewPortHeight(0));
-    yEnd = normelize(yEnd, rndr->getViewPortHeight(0));
-//    std::cout << "(xS,yS): (" << xStart << "," << yStart << "), (xE,yE): (" << xEnd << "," << yEnd << ")" << std::endl;
-    for (auto shape : scn->pickedShapes)
-    {
-        scn->SetShapeViewport(shape, -3);
-    }
-    scn->pickedShapes.clear();
-    Eigen::Matrix4f projection = rndr->GetProjection(0);
-    for (auto shape : scn->shapesGlobal)
-    {
-        if (shape.getIndex() != scn->cubeMapIndx && shape.getIndex() != 4)
-        {
-            Eigen::Vector3f pos = shape.getCurrentPosition();
-            Eigen::Vector4f posVec = Eigen::Vector4f(pos.x(), pos.y(), pos.z(), 1);
-            Eigen::Vector4f res =  projection * posVec;
-            float screenX, screenY;
-            screenX = res.x() /10;
-            screenY = -res.y()/10;
-            std::cout<<"x: "<<screenX<<"y: "<<screenY<<std::endl;
-            if (inside(xStart, yStart, xEnd, yEnd, screenX, screenY))
-            {
-                scn->SetShapeViewport(shape.getIndex(), 2);
-                scn->pickedShapes.push_back(shape.getIndex());
-            }
-        }
-    }
-}
-
 void movePickedObjects(double shiftSize, directions d ,Project* scn){
-    for ( int i : scn->pickedShapes) {
+    for ( int i : scn->pShapes) {
         scn->shapesGlobal[i].move(shiftSize,d);
     }
 }
@@ -148,9 +114,10 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
 
         if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
+            rndr->UnPick(2);
             double xEnd, yEnd;
             glfwGetCursorPos(window, &xEnd, &yEnd);
-            handlePicking(xStart, yStart, xEnd, yEnd, scn, rndr);
+            rndr->PickMany(2);
             rndr->Pressed();
         }
     }
@@ -184,6 +151,7 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
     {
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
         {
+            rndr->UnPick(2);
             glfwGetCursorPos(window, &xStart, &yStart);
             if (!rndr->IsPressed())
             {
@@ -199,7 +167,8 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
         {
             double xEnd, yEnd;
             glfwGetCursorPos(window, &xEnd, &yEnd);
-            handlePicking(xStart, yStart, xEnd, yEnd, scn, rndr);
+            rndr->PickMany(2);
+            scn->pickedShapes = scn->pShapes;
             rndr->Pressed();
         }
     }

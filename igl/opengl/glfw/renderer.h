@@ -188,11 +188,13 @@ public:
     inline bool IsMany() const { return isMany; }
     void Init(igl::opengl::glfw::Viewer *scene, std::list<int> xViewport, std::list<int> yViewport, int pickingBits,igl::opengl::glfw::imgui::ImGuiMenu *_menu);
 
-    Eigen::Matrix3f getXRotateMatrix(float theta);
+    void updateNormalX(float theta);
+    void updateNormalY(float theta);
     float getCameraAngle(int indx, directions d);
     float getCameraNear(int index);
-    Eigen::Vector3d cameraPos = Eigen::Vector3d(0, 0, 0);
-    Eigen::Vector3d cameraNormal;
+    Eigen::Vector3f cameraPos = Eigen::Vector3f(0, 0, 0);
+    Eigen::Vector3f cameraNormal;
+    Eigen::Vector2f calculatePlaneIntersection(Eigen::Vector3f p);
     //Angles are in radians
     float cameraYAngle = 0;
     float cameraXAngle = 0;
