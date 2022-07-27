@@ -8,6 +8,7 @@
 #include <igl/opengl/glfw/imgui/ImGuiMenu.h>
 #include <igl/opengl/glfw/imgui/ImGuiHelpers.h>
 #include <../imgui/imgui.h>
+#include <tutorial/Project/SceneShape.h>
 #include "../DrawBuffer.h"
 #include "../Camera.h"
 #include "../ViewerData.h"
@@ -186,6 +187,18 @@ public:
     inline bool IsPicked() { return isPicked; }
     inline bool IsMany() const { return isMany; }
     void Init(igl::opengl::glfw::Viewer *scene, std::list<int> xViewport, std::list<int> yViewport, int pickingBits,igl::opengl::glfw::imgui::ImGuiMenu *_menu);
+
+    void updateNormalX(float theta);
+    void updateNormalY(float theta);
+    float getCameraAngle(int indx, directions d);
+    float getCameraNear(int index);
+    Eigen::Vector3f cameraPos = Eigen::Vector3f(0, 0, 0);
+    Eigen::Vector3f cameraNormal;
+    Eigen::Vector2f calculatePlaneIntersection(Eigen::Vector3f p);
+    //Angles are in radians
+    float cameraYAngle = 0;
+    float cameraXAngle = 0;
+
 
 
 private:

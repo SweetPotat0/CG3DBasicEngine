@@ -33,16 +33,15 @@ public:
     float max_time = 1;
     ~Project(void);
     void ChangeCubeMap(std::string file_name);
-    void Project::NextCubeMap();
-    long globalTime;
-    bool animating = false;
+    void NextCubeMap();
 
 private:
     Renderer *renderer = nullptr;
-    
-    SceneShape AddGlobalShape(std::string name, shapes shapeType, std::shared_ptr<ObjectMover> mover,
-                              std::shared_ptr<Layer> layer, int parent, int viewPort);
-    SceneShape Project::AddGlobalShapeFromFile(std::string name, std::string file_name,
-                                               std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int parent);
-    
+    long globalTime;
+    SceneShape AddGlobalShapeFromFile(std::string name, std::string file_name,
+                                       std::shared_ptr<Layer> layer, int parent, Viewer* viewer);
+    SceneShape AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,
+                               std::shared_ptr<Layer> layer,Viewer* viewer, int parent, int viewPort );
+
+    bool animating;
 };
