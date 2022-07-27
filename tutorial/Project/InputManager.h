@@ -127,16 +127,7 @@ void glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
     Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
     Project *scn = (Project *)rndr->GetScene();
-
-//    if (rndr->IsPicked())
-//    {
-//        rndr->UpdateZpos((int)yoffset);
-//        rndr->MouseProccessing(GLFW_MOUSE_BUTTON_MIDDLE);
-//    }
-//    else
-//    {
-        rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
-//    }
+    rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
 }
 
 void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
