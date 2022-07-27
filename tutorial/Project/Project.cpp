@@ -34,7 +34,7 @@ bool Project::Load_Shape_From_File(
                                            Eigen::Vector3f(-10, -10, -100),
                                            Eigen::Vector3f(4, 4, 0)};
 
-    std::shared_ptr<ObjectMoverBezier> bez = std::make_shared<ObjectMoverBezier>(points, 0, 500);
+    std::shared_ptr<ObjectMoverBezier> bez = std::make_shared<ObjectMoverBezier>(points, 0, 500, &max_time);
     SceneShape shape = AddGlobalShapeFromFile("file: " + indxFile++, mesh_file_name_string, bez, nullptr, -1);
     SetShapeShader(shape.getIndex(), 2);
     SetShapeMaterial(shape.getIndex(), 2);
@@ -111,7 +111,7 @@ void Project::Init()
                                               Eigen::Vector3f(0, 20, 0),
                                               Eigen::Vector3f(0, 0, 0)};
 
-    std::shared_ptr<ObjectMoverBezier> bez = std::make_shared<ObjectMoverBezier>(points, 0, 500);
+    std::shared_ptr<ObjectMoverBezier> bez = std::make_shared<ObjectMoverBezier>(points, 0, 500, &max_time);
 
     // Cube map -->
 
@@ -130,7 +130,7 @@ void Project::Init()
     SceneShape shp = AddGlobalShape("test", Cube, bez, nullptr, -1);
     shapesGlobal[shp.getIndex()].addMover(std::make_shared<ObjectMoverConstant>(Eigen::Vector3f(0, 0, 0),
                                                                                 500, 50));
-    shapesGlobal[shp.getIndex()].addMover(std::make_shared<ObjectMoverBezier>(pointsRev, 550, 500));
+    shapesGlobal[shp.getIndex()].addMover(std::make_shared<ObjectMoverBezier>(pointsRev, 550, 500, &max_time));
 
     SetShapeShader(shp.getIndex(), basicShaderIndx);
     SetShapeMaterial(shp.getIndex(), box2DMatIndx);
@@ -166,30 +166,23 @@ void Project::Init()
 void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, const Eigen::Matrix4f &Model, unsigned int shaderIndx, unsigned int shapeIndx)
 {
     ++globalTime;
-    if (globalTime == 100)
-    {
-        //        std::list<int> x, y;
-        //        const int DISPLAY_WIDTH = 1200;
-        //        const int DISPLAY_HEIGHT = 800;
-        //        x.push_back(DISPLAY_WIDTH);
-        //        y.push_back(DISPLAY_HEIGHT);
-        //        igl::opengl::glfw::imgui::ImGuiMenu* menu = new igl::opengl::glfw::imgui::ImGuiMenu();
-        //        renderer->Init(this,x,y,1,menu);
-    }
     Shader *s = shaders[shaderIndx];
-    long time;
-    if (animating)
-        time = globalTime;
+    long ctime;
+    if (isActive)
+        ctime = globalTime;
     else
-        time = 0;
+        ctime = time;
+    //std::cout << time << std::endl;
     int r = ((shapeIndx + 1) & 0x000000FF) >> 0;
     int g = ((shapeIndx + 1) & 0x0000FF00) >> 8;
     int b = ((shapeIndx + 1) & 0x00FF0000) >> 16;
 
+    selected_data_index = shapeIndx;
+
     SceneShape scnShape = shapesGlobal[shapeIndx];
     Eigen::Vector3f pos = scnShape.getlastDrawnPosition();
 
-    Eigen::Vector3f newPos = scnShape.getPosition((float)time);
+    Eigen::Vector3f newPos = scnShape.getPosition((float)ctime);
     Eigen::Vector3f delta = newPos - pos;
 
     // pickedShapes = {scnShape.getIndex()};
@@ -262,12 +255,7 @@ void Project::ChangeCubeMap(std::string file_name)
 
 void Project::Animate()
 {
-
-    if (isActive)
-    {
-        if (selected_data_index > 0)
-            data()->MyRotate(Eigen::Vector3d(0, 1, 0), 0.01);
-    }
+    animating = !animating;
 }
 
 void Project::ScaleAllShapes(float amt, int viewportIndx)

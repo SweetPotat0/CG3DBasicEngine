@@ -1,5 +1,4 @@
 #pragma once
-
 #include <Eigen/Core>
 #include <vector>
 #include <memory>
@@ -44,7 +43,7 @@ private:
 
 class ObjectMoverBezier: public ObjectMover {
 public:
-    ObjectMoverBezier(const std::vector<Eigen::Vector3f>& points, float startTime, float duration);
+    ObjectMoverBezier(const std::vector<Eigen::Vector3f>& points, float startTime, float duration, float *max_time);
     Eigen::Vector3f getPosition(float time);
     float getStartTime();
     float getEndTime();

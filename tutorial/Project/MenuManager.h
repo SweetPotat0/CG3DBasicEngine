@@ -78,6 +78,7 @@ public:
 
     static void OnPlayChanged(bool play, Project *scn)
     {
+        scn->globalTime = 0;
     }
 
     static void OnSetLayer(std::string layer_name, Project *scn)

@@ -24,23 +24,25 @@ public:
     bool Load_Shape_From_File(const std::string &mesh_file_name_string);
     IGL_INLINE void my_open_dialog_load_mesh();
     void Play();
-    float time;
+    float time = 0;
     std::vector<SceneShape> shapesGlobal;
     std::vector<int> pickedShapes;
     int cubeMapIndx = -1;
     int blurShaderIndx = -1;
     int basicShaderIndx = -1;
-    float max_time;
+    float max_time = 1;
     ~Project(void);
     void ChangeCubeMap(std::string file_name);
     void Project::NextCubeMap();
+    long globalTime;
+    bool animating = false;
 
 private:
     Renderer *renderer = nullptr;
-    long globalTime;
+    
     SceneShape AddGlobalShape(std::string name, shapes shapeType, std::shared_ptr<ObjectMover> mover,
                               std::shared_ptr<Layer> layer, int parent, int viewPort);
     SceneShape Project::AddGlobalShapeFromFile(std::string name, std::string file_name,
                                                std::shared_ptr<ObjectMover> mover, std::shared_ptr<Layer> layer, int parent);
-    bool animating;
+    
 };

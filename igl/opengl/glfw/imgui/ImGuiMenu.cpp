@@ -446,19 +446,19 @@ namespace igl
                         if (ImGui::Checkbox("Play Animation", &(viewer->data()->play_is_active)))
                         {
                             viewer->isActive = viewer->data()->play_is_active;
-                            MenuManager::OnPlayChanged(viewer->data()->play_is_active, (Project *)viewer);
+                            MenuManager::OnPlayChanged(viewer->isActive, (Project *)viewer);
                             if (viewer->isActive)
                                 viewer->Activate();
                             else
                                 viewer->Deactivate();
-                            viewer->Animate();
+                            //viewer->Animate();
                         }
 
                         // Adding to viewer time param
                         if (ImGui::CollapsingHeader("Animation time", ImGuiTreeNodeFlags_DefaultOpen))
                         {
                             Project *project = (Project *)viewer;
-                            ImGui::DragFloat("Max time ", &(project->max_time), 0.05f, 0.0f, 100.0f, "%.0f");
+                            //ImGui::DragFloat("Max time ", &(project->max_time), 0.05f, 0.0f, 100.0f, "%.0f");
                             if (ImGui::SliderFloat("Time Scale", &(project->time), 0, (project)->max_time, "%.1f"))
                             {
                                 std::cout << project->time << std::endl;

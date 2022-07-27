@@ -75,7 +75,7 @@ void ObjectMoverConstant::shift(Eigen::Vector3f shiftValue) {
     position += shiftValue;
 }
 
-ObjectMoverBezier::ObjectMoverBezier(const std::vector<Eigen::Vector3f>& points, float startTime, float duration) {
+ObjectMoverBezier::ObjectMoverBezier(const std::vector<Eigen::Vector3f>& points, float startTime, float duration, float *max_time) {
     if(duration < 0){
         throw std::invalid_argument("Input mover duration must be > 0!");
     }
@@ -85,6 +85,8 @@ ObjectMoverBezier::ObjectMoverBezier(const std::vector<Eigen::Vector3f>& points,
     this->points = points;
     this->startTime = startTime;
     this->endTime = startTime + duration;
+    if (this->endTime > *max_time)
+        *max_time = this->endTime;
 }
 int BinomialCoefficient(const int n, const int k) {
     if(k==0)

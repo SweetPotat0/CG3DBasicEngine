@@ -161,6 +161,7 @@ public:
     int next_data_id;
     int next_shader_id; // for flags to mack sure all shaders are initlize with data
 	bool isActive;
+    bool animating = false;
     unsigned int staticScene;
 
     Shader* overlay_shader;
