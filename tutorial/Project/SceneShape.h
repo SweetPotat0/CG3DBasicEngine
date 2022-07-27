@@ -11,16 +11,27 @@ enum directions{
 
 class Layer {
 public:
+    Layer(bool isVisible, std::string layerName, std::vector<int> layerShapes);
+    std::string getName();
+    void setName(std::string name);
+    bool getIsVisible();
+    void setIsVisible(bool toSet);
+    void addShape(int shapeIndex);
+    void removeShape(int shapeIndex);
+    std::vector<int> getLayerShapes();
+private:
     bool isVisible;
+    std::string layerName;
+    std::vector<int> layerShapes;
 };
 
 class SceneShape {
 public:
     void SceneShape::Scale(double shiftSize, directions d);
     SceneShape(std::string shapeName, igl::opengl::glfw::Viewer::shapes shapeType,
-               std::shared_ptr<Layer> layer, int index, igl::opengl::glfw::Viewer* viewer);
-    std::shared_ptr<Layer> getLayer();
-    void changeLayer(std::shared_ptr<Layer> layer);
+                Layer* layer, int index, igl::opengl::glfw::Viewer* viewer);
+    Layer* getLayer();
+    void changeLayer(Layer* layer);
     int getIndex();
     void addPlaces(Eigen::Vector3f pos);
     bool isDrawn(float time);
@@ -52,7 +63,7 @@ private:
     Eigen::Vector3f currentPosition;
     igl::opengl::glfw::Viewer* viewer;
     //ObjectMoverSplit mover;
-    std::shared_ptr<Layer> layer;
+    Layer* layer;
     int index;
      Eigen::Vector3f lastDrawnPosition;
     SceneShape* parent;

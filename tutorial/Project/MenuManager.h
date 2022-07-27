@@ -61,12 +61,41 @@ public:
 
     static void OnAddLayer(std::string layer_name, bool is_shown, Project *scn)
     {
+        std::vector<int> layerShapes;
+        Layer *layer = new Layer(is_shown, layer_name, layerShapes);
+        scn->layers.push_back(layer);
     }
 
-    static void OnLayerChange(std::string layer_name, bool is_shown, Project *scn)
+    static void OnLayerChange(std::string layer_name, bool is_visible, Project *scn)
     {
+        for (Layer *layer : scn->layers)
+        {
+            if (layer->getName() == layer_name)
+            {
+                layer->setIsVisible(is_visible);
+                break;
+            }
+        }
     }
 
+    static void OnSetLayer(std::string layer_name, Project *scn)
+    {
+        std::cout << "Set layer: " << layer_name << ", num of picked: " << scn->pShapes.size() << std::endl;
+        Layer *changedLayer;
+        for (size_t i = 0; i < scn->layers.size(); i++)
+        {
+            if(scn->layers[i]->getName() == layer_name){
+                changedLayer = scn->layers[i];
+                break;
+            }
+        }
+        for (int shapeIndex : scn->pShapes)
+        {
+            scn->shapesGlobal[shapeIndex].getLayer()->removeShape(shapeIndex);
+            scn->shapesGlobal[shapeIndex].changeLayer(changedLayer);
+            scn->shapesGlobal[shapeIndex].getLayer()->addShape(shapeIndex);
+        }
+    }
     static void OnSelectMaterial(int material_inx, Project *scn)
     {
         for (size_t i = 0; i < scn->pShapes.size(); i++)
@@ -79,10 +108,5 @@ public:
     static void OnPlayChanged(bool play, Project *scn)
     {
         scn->globalTime = 0;
-    }
-
-    static void OnSetLayer(std::string layer_name, Project *scn)
-    {
-        std::cout << "Set layer: " << layer_name << ", num of picked: " << scn->pShapes.size() << std::endl;
     }
 };

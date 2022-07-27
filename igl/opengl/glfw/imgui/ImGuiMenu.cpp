@@ -283,20 +283,20 @@ namespace igl
 
                     if (ImGui::CollapsingHeader("Layers", ImGuiTreeNodeFlags_DefaultOpen))
                     {
-                        for (size_t i = 0; i < viewer->data()->layers.size(); i++)
+                        for (size_t i = 0; i < ((Project*)viewer)->layers.size(); i++)
                         {
-                            if (ImGui::Checkbox((viewer->data()->layers.at(i).name).c_str(),
-                                                &(viewer->data()->layers.at(i)).isShown))
+                            bool isVisible = (((Project*)viewer)->layers.at(i)->getIsVisible());
+                            if (ImGui::Checkbox((((Project*)viewer)->layers.at(i)->getName()).c_str(),
+                                                &isVisible))
                             {
-                                std::cout << "layer changed:" << (viewer->data()->layers.at(i)).isShown << std::endl;
-                                MenuManager::OnLayerChange((viewer->data()->layers.at(i).name), (viewer->data()->layers.at(i).isShown), (Project *)viewer);
+                                std::cout << "layer changed:" << (((Project*)viewer)->layers.at(i))->getIsVisible() << std::endl;
+                                MenuManager::OnLayerChange((((Project*)viewer)->layers.at(i)->getName()), isVisible, (Project *)viewer);
                             }
                         }
                         ImGui::InputText("", viewer->data()->layer_name);
                         if (ImGui::Button("Add Layer"))
                         {
                             MenuManager::OnAddLayer(viewer->data()->layer_name, true, (Project *)viewer);
-                            viewer->data()->layers.push_back(Layer(viewer->data()->layer_name, true));
                         }
                     }
 
@@ -351,19 +351,19 @@ namespace igl
 
                         // Set layer to picked objects
 
-                        std::string tempLayerSetStr = viewer->data()->layers.at(viewer->data()->layerSetIndex).name;
+                        std::string tempLayerSetStr = ((Project*)viewer)->layers.at(viewer->data()->layerSetIndex)->getName();
                         const char *current_layer_set_item = tempLayerSetStr.c_str();
                         if (ImGui::BeginCombo("##layers set combo", current_layer_set_item))
                         {
-                            for (size_t n = 0; n < viewer->data()->layers.size(); n++)
+                            for (size_t n = 0; n < ((Project*)viewer)->layers.size(); n++)
                             {
-                                bool is_selected = strcmp(current_layer_set_item, viewer->data()->layers.at(n).name.c_str()) == 0;
+                                bool is_selected = strcmp(current_layer_set_item, ((Project*)viewer)->layers.at(n)->getName().c_str()) == 0;
                                 // std::cout << "compare: " << std::string(current_layer_set_item) << " with " << ("material" + (std::to_string(n))).c_str() << std::endl;
-                                if (ImGui::Selectable(viewer->data()->layers.at(n).name.c_str(), is_selected))
+                                if (ImGui::Selectable(((Project*)viewer)->layers.at(n)->getName().c_str(), is_selected))
                                 {
-                                    current_layer_set_item = viewer->data()->layers.at(n).name.c_str();
+                                    current_layer_set_item = ((Project*)viewer)->layers.at(n)->getName().c_str();
                                     viewer->data()->layerSetIndex = n;
-                                    MenuManager::OnSetLayer(viewer->data()->layers.at(n).name, (Project *)viewer);
+                                    MenuManager::OnSetLayer(((Project*)viewer)->layers.at(n)->getName(), (Project *)viewer);
                                 }
                                 if (is_selected)
                                 {

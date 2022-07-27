@@ -34,13 +34,12 @@ public:
     void ChangeCubeMap(std::string file_name);
     void NextCubeMap();
     long globalTime;
+    std::vector<Layer*> layers;
 
 private:
     Renderer *renderer = nullptr;
-    SceneShape AddGlobalShapeFromFile(std::string name, std::string file_name,
-                                       std::shared_ptr<Layer> layer, int parent, Viewer* viewer);
-    SceneShape AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,
-                               std::shared_ptr<Layer> layer,Viewer* viewer, int parent, int viewPort );
+    SceneShape AddGlobalShapeFromFile(std::string name, std::string file_name, int parent, Viewer* viewer);
+    SceneShape AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,Viewer* viewer, int parent, int viewPort );
 
     bool animating;
 };

@@ -3,6 +3,8 @@
 #include <chrono>
 #include "./igl/file_dialog_open.h"
 
+Layer* defaultLayer = new Layer(true, "default", std::vector<int>());
+
 static void printMat(const Eigen::Matrix4d &mat)
 {
     std::cout << " matrix:" << std::endl;
@@ -34,7 +36,7 @@ bool Project::Load_Shape_From_File(
                                            Eigen::Vector3f(-10, -10, -100),
                                            Eigen::Vector3f(4, 4, 0)};
 
-    SceneShape shape = AddGlobalShapeFromFile("file: " + indxFile++, mesh_file_name_string,  nullptr, -1, this);
+    SceneShape shape = AddGlobalShapeFromFile("file: " + indxFile++, mesh_file_name_string, -1, this);
     SetShapeShader(shape.getIndex(), 2);
     SetShapeMaterial(shape.getIndex(), 2);
     std::cout << "Load mesh from file: " << mesh_file_name_string << std::endl;
@@ -58,22 +60,20 @@ void Project::SetMenu(igl::opengl::glfw::imgui::ImGuiMenu *menu)
 //{
 // }
 
-SceneShape Project::AddGlobalShapeFromFile(std::string name, std::string file_name,
-                                            std::shared_ptr<Layer> layer, int parent, Viewer* viewer)
+SceneShape Project::AddGlobalShapeFromFile(std::string name, std::string file_name, int parent, Viewer* viewer)
 {
     int index = AddShapeFromFile(file_name, parent, TRIANGLES);
-    SceneShape scnShape(name, MeshCopy, layer, index, viewer);
+    SceneShape scnShape(name, MeshCopy, defaultLayer, index, viewer);
     scnShape.setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
     shapesGlobal.push_back(scnShape);
     return scnShape;
 }
 
-SceneShape Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,
-                                    std::shared_ptr<Layer> layer,Viewer* viewer, int parent, int viewPort = 0 )
+SceneShape Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,Viewer* viewer, int parent, int viewPort = 0 )
 {
 
     int index = AddShape(shapeType, parent, TRIANGLES, viewPort);
-    SceneShape scnShape(name, shapeType, layer, index, viewer);
+    SceneShape scnShape(name, shapeType, defaultLayer, index, viewer);
     scnShape.setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
     shapesGlobal.push_back(scnShape);
     return scnShape;
@@ -81,6 +81,7 @@ SceneShape Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::
 
 void Project::Init()
 {
+    layers.push_back(defaultLayer);
     globalTime = -1;
     unsigned int texIDs[4] = {0, 1, 2, 3};
     unsigned int slots[4] = {0, 1, 2, 3};
@@ -113,7 +114,7 @@ void Project::Init()
 
     // Cube map -->
 
-    SceneShape cubeMap = AddGlobalShape("cubeMap", Cube,  nullptr, this ,  -2 );
+    SceneShape cubeMap = AddGlobalShape("cubeMap", Cube, this ,  -2 );
     SetShapeShader(cubeMap.getIndex(), cubemapShaderIndx);
     SetShapeMaterial(cubeMap.getIndex(), dayLight3DMatIndx);
 
@@ -125,17 +126,17 @@ void Project::Init()
 
     // End cubeMap
 
-    SceneShape shp = AddGlobalShape("test", Cube,  nullptr, this, -1);
+    SceneShape shp = AddGlobalShape("test", Cube, this, -1);
     SetShapeShader(shp.getIndex(), basicShaderIndx);
     SetShapeMaterial(shp.getIndex(), box2DMatIndx);
 
 
-    SceneShape shp1 = AddGlobalShape("test 1", Cube,  nullptr,this,  -1);
+    SceneShape shp1 = AddGlobalShape("test 1", Cube,this,  -1);
     SetShapeShader(shp1.getIndex(), basicShaderIndx);
     SetShapeMaterial(shp1.getIndex(), box2DMatIndx);
 
 
-    SceneShape shp2 = AddGlobalShape("test 2", Cube,  nullptr,this,  -1);
+    SceneShape shp2 = AddGlobalShape("test 2", Cube,this,  -1);
     SetShapeShader(shp2.getIndex(), basicShaderIndx);
     SetShapeMaterial(shp2.getIndex(), box2DMatIndx);
 
@@ -147,7 +148,7 @@ void Project::Init()
     // Picking plane -->
 
 
-    SceneShape pickingPlane = AddGlobalShape("Picking plane", Plane,  nullptr,this, -2, 1);
+    SceneShape pickingPlane = AddGlobalShape("Picking plane", Plane,this, -2, 1);
     SetShapeShader(pickingPlane.getIndex(), pickingShaderIndx);
     SetShapeMaterial(pickingPlane.getIndex(), plane2DMatIndx);
 

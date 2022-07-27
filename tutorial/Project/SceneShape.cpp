@@ -4,19 +4,61 @@
 
 #include "SceneShape.h"
 
+// Layer ------>
+Layer::Layer(bool isVisible, std::string layerName, std::vector<int> layerShapes) : isVisible(isVisible), layerName(layerName), layerShapes(layerShapes) {}
+
+std::string Layer::getName()
+{
+    return this->layerName;
+}
+
+void Layer::setName(std::string name)
+{
+    this->layerName = name;
+}
+
+bool Layer::getIsVisible()
+{
+    return this->isVisible;
+}
+
+void Layer::setIsVisible(bool toSet)
+{
+    this->isVisible = toSet;
+}
+std::vector<int> Layer::getLayerShapes()
+{
+    return this->layerShapes;
+}
+
+void Layer::addShape(int shapeIndex) {
+    this->layerShapes.push_back(shapeIndex);
+}
+
+void Layer::removeShape(int shapeIndex) {
+    std::vector<int> layerShapes;
+    for(int num : this->layerShapes){
+        if(num != shapeIndex)
+            layerShapes.push_back(num);
+    }
+    this->layerShapes = layerShapes;
+    
+}
+//END Layer ------->
+
 SceneShape::SceneShape(std::string shapeName, igl::opengl::glfw::Viewer::shapes shapeType,
-                       std::shared_ptr<Layer> layer, int index, igl::opengl::glfw::Viewer *viewer) : name(shapeName), type(shapeType),
+                       Layer* layer, int index, igl::opengl::glfw::Viewer *viewer) : name(shapeName), type(shapeType),
                                                                                                      layer(layer), index(index), currentPosition(Eigen::Vector3f(0, 0, 0)), viewer(viewer)
 {
     movement = std::vector<Eigen::Vector4f>();
     NextPlaceIndex = 0;
 }
 
-std::shared_ptr<Layer> SceneShape::getLayer()
+Layer* SceneShape::getLayer()
 {
     return layer;
 }
-void SceneShape::changeLayer(std::shared_ptr<Layer> layer)
+void SceneShape::changeLayer(Layer* layer)
 {
     this->layer = layer;
 }
