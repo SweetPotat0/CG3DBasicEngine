@@ -56,6 +56,20 @@ void Project::SetMenu(igl::opengl::glfw::imgui::ImGuiMenu *menu)
     this->menu = menu;
 }
 
+void Project::ModeChange() {
+    for (int i : pShapes) {
+        SceneShape shp = shapesGlobal[i];
+        int mode = data_list[shp.getIndex()]->mode;
+
+        if (mode == 4) {
+            data_list[shp.getIndex()]->mode = 1;
+        }
+        else 
+            data_list[shp.getIndex()]->mode = 4;
+        
+    }
+}
+
 // Project::Project(float angle ,float relationWH, float near, float far) : Scene(angle,relationWH,near,far)
 //{
 // }

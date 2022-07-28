@@ -43,6 +43,7 @@ public:
     void updateFarShapes();
     float calculateCameraDistance(SceneShape shp);
     float farCoeff = 20;
+    void ModeChange();
     
 private:
     Renderer *renderer = nullptr;

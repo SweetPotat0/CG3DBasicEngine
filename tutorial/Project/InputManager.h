@@ -8,7 +8,7 @@
 
 bool holdsLeft;
 double xStart, yStart;
-//0=LEFT/UP, 1=RIGHT/DOWN
+// 0=LEFT/UP, 1=RIGHT/DOWN
 int ChosenScreen = 0;
 
 float normelize(float num, int maxSize)
@@ -173,20 +173,20 @@ void glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
     Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
     Project *scn = (Project *)rndr->GetScene();
 
-    //Set chosen camera
-    //If chosen screen is 0, than we need viewport 0 so drawinfo 1=1+0 is still valid,
-    //and if screen is 1 than we need draw info 2 = 1+1
-    int ChosenCamera = scn->GetRenderer()->GetDrawCamera(ChosenScreen+1);
+    // Set chosen camera
+    // If chosen screen is 0, than we need viewport 0 so drawinfo 1=1+0 is still valid,
+    // and if screen is 1 than we need draw info 2 = 1+1
+    int ChosenCamera = scn->GetRenderer()->GetDrawCamera(ChosenScreen + 1);
 
     if (rndr->IsPicked())
     {
-        std::cout<<"picked!"<<std::endl;
+        std::cout << "picked!" << std::endl;
         rndr->UpdateZpos((int)yoffset);
         rndr->MouseProccessing(GLFW_MOUSE_BUTTON_MIDDLE);
     }
     else
     {
-        std::cout<<"not picked!"<<std::endl;
+        std::cout << "not picked!" << std::endl;
         rndr->MoveCamera(ChosenCamera, rndr->zTranslate, (float)yoffset);
     }
 }
@@ -204,7 +204,7 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
     {
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
         {
-            std::cout<<"Unpick"<<std::endl;
+            std::cout << "Unpick" << std::endl;
             rndr->UnPick(2);
             glfwGetCursorPos(window, &xStart, &yStart);
             if (!rndr->IsPressed())
@@ -221,16 +221,13 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
             //         std::cout<<"XPOS: "<<xpos<<" XSTART: "<<xStart<<std::endl;
             //         scn->data_list[indx]->MyRotate(Eigen::Vector3d(0, 1, 0), 0.03, 1);
 
-
             //     }else{
             //         scn->data_list[indx]->MyRotate(Eigen::Vector3d(1, 0, 0), 0.03, 1);
 
-
             //     }
-               rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
+            rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
 
             // }
-
         }
         else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && rndr->IsPressed())
         {
@@ -254,16 +251,19 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
     Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
     Project *scn = (Project *)rndr->GetScene();
 
-    //Set chosen camera
-    //If chosen screen is 0, than we need viewport 0 so drawinfo 1=1+0 is still valid,
-    //and if screen is 1 than we need draw info 2 = 1+1
-    int ChosenCamera = scn->GetRenderer()->GetDrawCamera(ChosenScreen+1);
-    
+    // Set chosen camera
+    // If chosen screen is 0, than we need viewport 0 so drawinfo 1=1+0 is still valid,
+    // and if screen is 1 than we need draw info 2 = 1+1
+    int ChosenCamera = scn->GetRenderer()->GetDrawCamera(ChosenScreen + 1);
+
     // rndr->FreeShapes(2);
     if (action == GLFW_PRESS || action == GLFW_REPEAT)
     {
         switch (key)
         {
+        case GLFW_KEY_Q:
+            scn->ModeChange();
+            break;
         case GLFW_KEY_ESCAPE:
             glfwSetWindowShouldClose(window, GLFW_TRUE);
             break;
