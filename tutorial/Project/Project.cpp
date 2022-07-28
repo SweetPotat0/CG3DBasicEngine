@@ -82,7 +82,7 @@ SceneShape Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::
 
 void Project::Init()
 {
-    far = 3;
+    far = 20;
     farShapes = std::vector<int>();
     globalTime = -1;
     unsigned int texIDs[4] = {0, 1, 2, 3};
