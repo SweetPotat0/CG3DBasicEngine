@@ -104,35 +104,6 @@ void movePickedObjects(double shiftSize, directions d, Project *scn)
     for (int i : scn->pShapes)
     {
         scn->shapesGlobal[i].move(shiftSize, d);
-        // void handlePicking(double xStart, double yStart, double xEnd, double yEnd, Project *scn, Renderer *rndr)
-        // {
-        //     xStart = normelize(xStart, rndr->getViewPortWidth(0));
-        //     xEnd = normelize(xEnd, rndr->getViewPortWidth(0));
-        //     yStart = normelize(yStart, rndr->getViewPortHeight(0));
-        //     yEnd = normelize(yEnd, rndr->getViewPortHeight(0));
-        //     std::cout << "(xS,yS): (" << xStart << "," << yStart << "), (xE,yE): (" << xEnd << "," << yEnd << ")" << std::endl;
-        //     for (auto shape : scn->pickedShapes)
-        //     {
-        //         scn->SetShapeViewport(shape, -3);
-        //     }
-        //     scn->pickedShapes.clear();
-        //     Eigen::Matrix4f projection = rndr->GetProjection(0);
-        //     for (auto shape : scn->shapesGlobal)
-        //     {
-        //         if (shape.getIndex() != scn->cubeMapIndx && shape.getIndex() != scn->pickingPlaneIndx)
-        //         {
-        //             Eigen::Vector3f pos = shape.getPosition(0);
-        //             Eigen::Vector4f posVec = Eigen::Vector4f(pos.x(), pos.y(), pos.z(), 1);
-        //             Eigen::Vector4f res = projection * posVec;
-        //             float screenX, screenY;
-        //             screenX = res.x();
-        //             screenY = res.y();
-        //             if (inside(xStart, yStart, xEnd, yEnd, screenX, screenY))
-        //             {
-        //                 scn->SetShapeViewport(shape.getIndex(), 3);
-        //                 scn->pickedShapes.push_back(shape.getIndex());
-        //             }
-        //         }
     }
 }
 
@@ -147,6 +118,7 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
         {
             rndr->Pressed();
             glfwGetCursorPos(window, &xStart, &yStart);
+            rndr->UnPick(3);
         }
         rndr->UpdatePress(xStart, yStart);
     }
@@ -157,7 +129,7 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
 
         if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
-            rndr->UnPick(3);
+            
             double xEnd, yEnd;
             glfwGetCursorPos(window, &xEnd, &yEnd);
             rndr->PickMany(3);
@@ -178,13 +150,11 @@ void glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 
     if (rndr->IsPicked())
     {
-        std::cout<<"picked!"<<std::endl;
         rndr->UpdateZpos((int)yoffset);
         rndr->MouseProccessing(GLFW_MOUSE_BUTTON_MIDDLE);
     }
     else
     {
-        std::cout<<"not picked!"<<std::endl;
         rndr->MoveCamera(ChosenCamera, rndr->zTranslate, (float)yoffset);
     }
 }
@@ -201,7 +171,6 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
     {
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
         {
-            std::cout<<"Unpick"<<std::endl;
             rndr->UnPick(2);
             glfwGetCursorPos(window, &xStart, &yStart);
             if (!rndr->IsPressed())
@@ -262,49 +231,40 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
 
             break;
         case GLFW_KEY_DOWN:
-            // scn->shapeTransformation(scn->xGlobalRotate,-5.f);
-            // cout<< "down: "<<endl;
             rndr->MoveCamera(ChosenCamera, scn->xRotate, -0.05f);
             break;
         case GLFW_KEY_LEFT:
             rndr->MoveCamera(ChosenCamera, scn->yRotate, 0.05f);
             break;
         case GLFW_KEY_RIGHT:
-            // scn->shapeTransformation(scn->xGlobalRotate,-5.f);
-            // cout<< "down: "<<endl;
-            rndr->MoveCamera(ChosenCamera, scn->yRotate, -0.5f);
-            break;
-        case GLFW_KEY_U:
-            rndr->MoveCamera(0, scn->yTranslate, 0.25f);
+            rndr->MoveCamera(ChosenCamera, scn->yRotate, -0.05f);
             break;
         case GLFW_KEY_D:
-            //            rndr->MoveCamera(0, scn->yTranslate, -0.25f);
-            movePickedObjects(0.02, x, scn);
+            if (rndr->IsPicked())
+                movePickedObjects(0.02, x, scn);
+            else
+                rndr->MoveCamera(ChosenCamera, scn->xTranslate, 0.25f);
             break;
         case GLFW_KEY_A:
-            movePickedObjects(-0.02, x, scn);
+            if (rndr->IsPicked())
+                movePickedObjects(-0.02, x, scn);
+            else
+                rndr->MoveCamera(ChosenCamera, scn->xTranslate, -0.25f);
             break;
         case GLFW_KEY_W:
-            movePickedObjects(0.02, y, scn);
+            if (rndr->IsPicked())
+                movePickedObjects(0.02, y, scn);
+            else
+                rndr->MoveCamera(ChosenCamera, scn->yTranslate, 0.25f);
             break;
         case GLFW_KEY_S:
-            movePickedObjects(-0.02, y, scn);
-            break;
-        case GLFW_KEY_L:
-            rndr->MoveCamera(ChosenCamera, scn->xTranslate, -0.25f);
+            if (rndr->IsPicked())
+                movePickedObjects(-0.02, y, scn);
+            else
+                rndr->MoveCamera(ChosenCamera, scn->yTranslate, -0.25f);
             break;
         case GLFW_KEY_K:
             scn->NextCubeMap();
-            break;
-        case GLFW_KEY_R:
-            rndr->MoveCamera(ChosenCamera, scn->xTranslate, 0.25f);
-            break;
-
-        case GLFW_KEY_B:
-            rndr->MoveCamera(ChosenCamera, scn->zTranslate, 0.5f);
-            break;
-        case GLFW_KEY_F:
-            rndr->MoveCamera(ChosenCamera, scn->zTranslate, -0.5f);
             break;
         case GLFW_KEY_T:
         {
@@ -318,9 +278,6 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
             rndr->MoveCamera(ChosenCamera, scn->xTranslate, center.x());
             rndr->MoveCamera(ChosenCamera, scn->yTranslate, center.y());
             rndr->MoveCamera(ChosenCamera, scn->zTranslate, center.z());
-            /*if (!scn->pickedShapes.empty())
-                std::cout << scn->pickedShapes.front() << std::endl;*/
-            // rndr->MoveCamera(0, scn->zTranslate, -0.5f);
             break;
         }
         case GLFW_KEY_X:
@@ -351,7 +308,6 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
             scalePickedObjects(1.1, w, scn);
             break;
         case GLFW_KEY_MINUS:
-            std::cout << "minus" << std::endl;
             scalePickedObjects(0.9, w, scn);
             break;
         case GLFW_KEY_LEFT_SHIFT:

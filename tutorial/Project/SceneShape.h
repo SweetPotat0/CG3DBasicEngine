@@ -67,6 +67,7 @@ public:
     void changeLayer(Layer* layer);
     int getIndex();
     void addBiz(BizMovment biz, float *max_time);
+    void clearBiz();
     Eigen::Vector3f getPosition(float time);
     Eigen::Vector3f getlastDrawnPosition();
     void setlastDrawnPosition(Eigen::Vector3f pos);

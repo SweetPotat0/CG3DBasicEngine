@@ -39,6 +39,10 @@ public:
     Renderer *GetRenderer() { return renderer; }
     int DISPLAY_WIDTH;
     int DISPLAY_HEIGHT;
+    float bizPoint[3] = {0,0,0};
+    std::vector<Eigen::Vector3f> bizPoints;
+    float start_end_time[2] = { 0, max_time };
+
 
 private:
     Renderer *renderer = nullptr;

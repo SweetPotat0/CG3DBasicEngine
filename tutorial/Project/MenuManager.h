@@ -165,4 +165,28 @@ public:
     {
         scn->globalTime = 0;
     }
+    static void onAddPoint(float point[3], Project* scn) {
+        scn->bizPoints.push_back(Eigen::Vector3f(point[0], point[1], point[2]));
+        std::cout << "point added: (" << point[0] << "," << point[1] << "," << point[2] << ")" << std::endl;
+        scn->bizPoint[0] = 0;
+        scn->bizPoint[1] = 0;
+        scn->bizPoint[2] = 0;
+    }
+    static void onAddBiz(float times[2], Project* scn) {
+        BizMovment movment = BizMovment(scn->bizPoints, times[0], times[1]);
+        scn->bizPoints.clear();
+        for (int i : scn->pShapes) {
+            std::cout << "Bezier movment added to shape: " << i << std::endl;
+            scn->shapesGlobal[i].addBiz(movment,&(scn->max_time));
+        }
+        scn->start_end_time[0] = 0;
+        scn->start_end_time[1] = scn->max_time;
+    }
+    static void onRemoveBiz(Project* scn) {
+        for (int i : scn->pShapes) {
+            std::cout << "Bezier movment removed from shape: " << i << std::endl;
+            scn->shapesGlobal[i].clearBiz();
+        }
+    }
+    
 };

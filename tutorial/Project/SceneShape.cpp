@@ -48,7 +48,7 @@ void Layer::removeShape(int shapeIndex) {
 
 SceneShape::SceneShape(std::string shapeName, igl::opengl::glfw::Viewer::shapes shapeType,
     Layer* layer, int index, igl::opengl::glfw::Viewer* viewer) : name(shapeName), type(shapeType),
-    layer(layer), index(index), currentPosition(Eigen::Vector3f(0, 0, 0)), viewer(viewer)
+    layer(layer),parent(nullptr), index(index), currentPosition(Eigen::Vector3f(0, 0, 0)), viewer(viewer)
 {
     movement = std::vector<BizMovment>();
 }
@@ -70,6 +70,10 @@ void SceneShape::addBiz(BizMovment biz, float *max_time) {
     this->movement.push_back(biz);
     if (biz.end_time > *max_time)
         *max_time = biz.end_time;
+}
+
+void SceneShape::clearBiz() {
+    this->movement.clear();
 }
 
 

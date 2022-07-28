@@ -309,7 +309,6 @@ namespace igl
                             for (size_t n = 0; n < viewer->materials.size(); n++)
                             {
                                 bool is_selected = strcmp(current_material_item, ("material" + (std::to_string(n))).c_str()) == 0;
-                                std::cout << "compare: " << std::string(current_material_item) << " with " << ("material" + (std::to_string(n))).c_str() << std::endl;
                                 if (ImGui::Selectable(("material" + (std::to_string(n))).c_str(), is_selected))
                                 {
                                     current_material_item = ("material" + (std::to_string(n))).c_str();
@@ -358,7 +357,6 @@ namespace igl
                             for (size_t n = 0; n < ((Project *)viewer)->layers.size(); n++)
                             {
                                 bool is_selected = strcmp(current_layer_set_item, ((Project *)viewer)->layers.at(n)->getName().c_str()) == 0;
-                                // std::cout << "compare: " << std::string(current_layer_set_item) << " with " << ("material" + (std::to_string(n))).c_str() << std::endl;
                                 if (ImGui::Selectable(((Project *)viewer)->layers.at(n)->getName().c_str(), is_selected))
                                 {
                                     current_layer_set_item = ((Project *)viewer)->layers.at(n)->getName().c_str();
@@ -455,50 +453,25 @@ namespace igl
                                 viewer->Deactivate();
                             // viewer->Animate();
                         }
+                        Project* project = (Project*)viewer;
+                        // ImGui::DragFloat("Max time ", &(project->max_time), 0.05f, 0.0f, 100.0f, "%.0f");
+                        if (ImGui::SliderFloat("Time Scale", &(project->time), 0, (project)->max_time, "%.1f")) {}
 
                         // Adding to viewer time param
-                        if (ImGui::CollapsingHeader("Animation time", ImGuiTreeNodeFlags_DefaultOpen))
+                        if (ImGui::CollapsingHeader("Add movment to selected shapes", ImGuiTreeNodeFlags_DefaultOpen))
                         {
-                            Project *project = (Project *)viewer;
-                            // ImGui::DragFloat("Max time ", &(project->max_time), 0.05f, 0.0f, 100.0f, "%.0f");
-                            if (ImGui::SliderFloat("Time Scale", &(project->time), 0, (project)->max_time, "%.1f"))
-                            {
-                                std::cout << project->time << std::endl;
-                            }
+                            ImGui::InputFloat3("point",project->bizPoint);
+                            if (ImGui::Button("Add point"))
+                                MenuManager::onAddPoint(project->bizPoint, (Project*)viewer);
+                            ImGui::InputFloat2("time", project->start_end_time);
+                            if (ImGui::Button("Add Bézier movment"))
+                                MenuManager::onAddBiz(project->start_end_time, (Project*)viewer);
+                            if (ImGui::Button("Remove Bézier movment"))
+                                MenuManager::onRemoveBiz((Project*)viewer);
                         }
+
                     }
 
-                    // Draw options
-                    //   if (ImGui::CollapsingHeader("Draw Options", ImGuiTreeNodeFlags_DefaultOpen))
-                    //   {
-                    //     if (ImGui::Checkbox("Face-based", &(viewer->data()->face_based)))
-                    //     {
-                    //       viewer->data()->dirty = MeshGL::DIRTY_ALL;
-                    //     }
-
-                    // //
-                    // //    make_checkbox("Show texture", viewer->data().show_texture);
-                    // //    if (ImGui::Checkbox("Invert normals", &(viewer->data().invert_normals)))
-                    // //    {
-                    // //      viewer->data().dirty |= igl::opengl::MeshGL::DIRTY_NORMAL;
-                    // //    }
-                    //     make_checkbox("Show overlay", viewer->data()->show_overlay);
-                    //     make_checkbox("Show overlay depth", viewer->data()->show_overlay_depth);
-
-                    //     ImGui::ColorEdit4("Line color", viewer->data()->line_color.data(),
-                    //         ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
-                    //     ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
-                    //     ImGui::DragFloat("Shininess", &(viewer->data()->shininess), 0.05f, 0.0f, 100.0f);
-                    //     ImGui::PopItemWidth();
-                    //   }
-
-                    //   // Overlays
-                    //   if (ImGui::CollapsingHeader("Overlays", ImGuiTreeNodeFlags_DefaultOpen))
-                    //   {
-                    //     make_checkbox("Wireframe", viewer->data()->show_lines);
-                    //     make_checkbox("Fill", viewer->data()->show_faces);
-
-                    //   }
                     ImGui::End();
                 }
 

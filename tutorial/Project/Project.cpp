@@ -5,16 +5,6 @@
 
 Layer *defaultLayer = new Layer(true, "default", std::vector<int>());
 
-static void printMat(const Eigen::Matrix4d &mat)
-{
-    std::cout << " matrix:" << std::endl;
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-            std::cout << mat(j, i) << " ";
-        std::cout << std::endl;
-    }
-}
 
 IGL_INLINE void Project::my_open_dialog_load_mesh()
 {
@@ -110,17 +100,19 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
 
     int box2DMatIndx = AddMaterial(&boxTexIndx, slots + 2, 1);
     int plane2DMatIndx = AddMaterial(&planeTexIndx, slots + 3, 1);
+    
 
-    std::vector<Eigen::Vector3f> points = {Eigen::Vector3f(0, 0, 0),
-                                           Eigen::Vector3f(0, 20, 0),
-                                           Eigen::Vector3f(-10, -10, -100),
-                                           Eigen::Vector3f(0, 0, 0)};
+    std::vector<Eigen::Vector3f> points = { Eigen::Vector3f(0, 0, 0),
+                                           Eigen::Vector3f(0, 10, 0) };
 
-    std::vector<Eigen::Vector3f> pointsRev = {Eigen::Vector3f(0, 0, 0),
-                                              Eigen::Vector3f(-10, -10, -100),
-                                              Eigen::Vector3f(0, 20, 0),
-                                              Eigen::Vector3f(0, 0, 0)};
-    std::vector<Eigen::Vector3f> point = {Eigen::Vector3f(0, 2, 0)};
+    std::vector<Eigen::Vector3f> jumpUpBiz = { Eigen::Vector3f(0, 0, 0),
+                                           Eigen::Vector3f(0, 10, 0) };
+    std::vector<Eigen::Vector3f> jumpDownBiz = { Eigen::Vector3f(0, 0, 0),
+                                           Eigen::Vector3f(0, -10, 0) };
+    std::vector<Eigen::Vector3f> jumpRightBiz = { Eigen::Vector3f(0, 0, 0),
+                                           Eigen::Vector3f(10, 0, 0) };
+    std::vector<Eigen::Vector3f> jumpLeftBiz = { Eigen::Vector3f(0, 0, 0),
+                                           Eigen::Vector3f(-10, 0, 0) };
 
     // Cube map -->
 
@@ -150,8 +142,8 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
     shapesGlobal[index].addBiz(BizMovment(points, 0, 500), &max_time);
-    shapesGlobal[index].addBiz(BizMovment(point, 500, 1000), &max_time);
-    shapesGlobal[index].addBiz(BizMovment(pointsRev, 1000, 1500), &max_time);
+    //shapesGlobal[index].addBiz(BizMovment(point, 500, 1000), &max_time);
+    //shapesGlobal[index].addBiz(BizMovment(pointsRev, 1000, 1500), &max_time);
     shapesGlobal[index].move(2, y);
 
     index = AddGlobalShape("test 1", Cube, this, -1);
@@ -179,6 +171,10 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
     if (isActive)
     {
         ++globalTime;
+        if (globalTime >= max_time) {
+            globalTime = max_time;
+            Deactivate();
+        }
         ctime = globalTime;
     }
     else
