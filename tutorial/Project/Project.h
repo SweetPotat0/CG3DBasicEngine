@@ -16,7 +16,6 @@ public:
     void Animate() override;
     void ScaleAllShapes(float amt, int viewportIndx);
     void SetRenderer(Renderer *renderer);
-    Renderer* GetRenderer();
     void SetParent(int shape, int newParent);
     int GetParent(int shape);
     void SetMenu(igl::opengl::glfw::imgui::ImGuiMenu *menu);
@@ -42,9 +41,9 @@ public:
     int DISPLAY_HEIGHT;
     std::vector<int> farShapes;
     void updateFarShapes();
-    float far;
     float calculateCameraDistance(SceneShape shp);
-
+    float farCoeff = 20;
+    
 private:
     Renderer *renderer = nullptr;
     int AddGlobalShapeFromFile(std::string name, std::string file_name, int parent, Viewer *viewer, int viewPort);

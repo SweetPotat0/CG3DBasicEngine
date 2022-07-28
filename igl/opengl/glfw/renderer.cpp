@@ -149,11 +149,13 @@ IGL_INLINE void Renderer::draw( GLFWwindow* window)
 		post_resize(window,width, height);
 		highdpi = highdpi_tmp;
 	}
-	if (menu)
+	
+    if (menu)
 	{
 		menu->pre_draw();
 		menu->callback_draw_viewer_menu();
     }
+
     int indx = 0;
     for (auto& info : drawInfos)
     {
@@ -161,7 +163,7 @@ IGL_INLINE void Renderer::draw( GLFWwindow* window)
             draw_by_info(indx);
         indx++;
     }
-
+    
     if (menu)
 	{
 		menu->post_draw();

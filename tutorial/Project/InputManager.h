@@ -146,6 +146,7 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
         Project *scn = (Project *)rndr->GetScene();
         if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
+            rndr->UnPick(3);
             rndr->Pressed();
             glfwGetCursorPos(window, &xStart, &yStart);
         }
@@ -214,21 +215,21 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
         else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
         {
 
-
-            for(int indx : scn->pShapes){
-                if (abs(xpos-xStart)>=abs(ypos-yStart)){
-                    std::cout<<"XPOS: "<<xpos<<" XSTART: "<<xStart<<std::endl;
-                    scn->data_list[indx]->MyRotate(Eigen::Vector3d(0, 1, 0), 0.03, 1);
-
-
-                }else{
-                    scn->data_list[indx]->MyRotate(Eigen::Vector3d(1, 0, 0), 0.03, 1);
+            // std::cout<<"xpos: "<<xpos<<", xStart: "<<xStart<<", yPos: "<<ypos<<"yStart"
+            // for(int indx : scn->pShapes){
+            //     if (abs(xpos-xStart)>=abs(ypos-yStart)){
+            //         std::cout<<"XPOS: "<<xpos<<" XSTART: "<<xStart<<std::endl;
+            //         scn->data_list[indx]->MyRotate(Eigen::Vector3d(0, 1, 0), 0.03, 1);
 
 
-                }
-//                rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
+            //     }else{
+            //         scn->data_list[indx]->MyRotate(Eigen::Vector3d(1, 0, 0), 0.03, 1);
 
-            }
+
+            //     }
+               rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
+
+            // }
 
         }
         else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && rndr->IsPressed())

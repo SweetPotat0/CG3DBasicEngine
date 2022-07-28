@@ -89,12 +89,11 @@ int Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes 
 
 void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
 {
-    far = 20;
     farShapes = std::vector<int>();
     this->DISPLAY_WIDTH = DISPLAY_WIDTH;
     this->DISPLAY_HEIGHT = DISPLAY_HEIGHT;
     layers.push_back(defaultLayer);
-    //Maybe needs -1
+    // Maybe needs -1
     globalTime = 0;
     unsigned int texIDs[4] = {0, 1, 2, 3};
     unsigned int slots[4] = {0, 1, 2, 3};
@@ -157,12 +156,12 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
     shapesGlobal[index].addBiz(BizMovment(pointsRev, 1000, 1500), &max_time);
     shapesGlobal[index].move(2, y);
 
-    index = AddGlobalShape("test 1", Cube, this, -1);
+    index = AddGlobalShape("test 1", Cube, this, -4);
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
     shapesGlobal[index].move(2, x);
 
-    index = AddGlobalShape("test 2", Cube, this, -1);
+    index = AddGlobalShape("test 2", Cube, this, -3);
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
 
@@ -175,21 +174,30 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
     //	ReadPixel(); //uncomment when you are reading from the z-buffer
 }
 
-float Project::calculateCameraDistance(SceneShape shp) {
+float Project::calculateCameraDistance(SceneShape shp)
+{
     Eigen::Vector3f cameraPos = renderer->cameraPos;
     Eigen::Vector3f shapePos = shp.getCurrentPosition();
-    return (shapePos-cameraPos).norm();
+    return (shapePos - cameraPos).norm();
 }
 
-void Project::updateFarShapes(){
-    for (int indx : farShapes) {
-        SetShapeShader(indx,basicShaderIndx);
+void Project::updateFarShapes()
+{
+    for (int indx : farShapes)
+    {
+        SetShapeShader(indx, basicShaderIndx);
     }
     farShapes.clear();
-    for(SceneShape shp : shapesGlobal){
+    for (SceneShape shp : shapesGlobal)
+    {
+        if (shp.getIndex() == cubeMapIndx || shp.getIndex() == pickingPlaneIndx)
+        {
+            continue;
+        }
         float dist = calculateCameraDistance(shp);
-        if(dist > far){
-            SetShapeShader(shp.getIndex(),blurShaderIndx);
+        if (dist > farCoeff)
+        {
+            SetShapeShader(shp.getIndex(), blurShaderIndx);
             farShapes.push_back(shp.getIndex());
         }
     }
@@ -331,9 +339,3 @@ void Project::Play()
     animating = !animating;
     globalTime = -1;
 }
-
-Renderer *Project::GetRenderer() {
-    return renderer;
-}
-
-
