@@ -46,6 +46,20 @@ void Project::SetMenu(igl::opengl::glfw::imgui::ImGuiMenu *menu)
     this->menu = menu;
 }
 
+void Project::ModeChange() {
+    for (int i : pShapes) {
+        SceneShape shp = shapesGlobal[i];
+        int mode = data_list[shp.getIndex()]->mode;
+
+        if (mode == 4) {
+            data_list[shp.getIndex()]->mode = 1;
+        }
+        else 
+            data_list[shp.getIndex()]->mode = 4;
+        
+    }
+}
+
 // Project::Project(float angle ,float relationWH, float near, float far) : Scene(angle,relationWH,near,far)
 //{
 // }
@@ -79,9 +93,11 @@ int Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes 
 
 void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
 {
+    farShapes = std::vector<int>();
     this->DISPLAY_WIDTH = DISPLAY_WIDTH;
     this->DISPLAY_HEIGHT = DISPLAY_HEIGHT;
     layers.push_back(defaultLayer);
+    // Maybe needs -1
     globalTime = 0;
     unsigned int texIDs[4] = {0, 1, 2, 3};
     unsigned int slots[4] = {0, 1, 2, 3};
@@ -146,12 +162,12 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
     //shapesGlobal[index].addBiz(BizMovment(pointsRev, 1000, 1500), &max_time);
     shapesGlobal[index].move(2, y);
 
-    index = AddGlobalShape("test 1", Cube, this, -1);
+    index = AddGlobalShape("test 1", Cube, this, -4);
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
     shapesGlobal[index].move(2, x);
 
-    index = AddGlobalShape("test 2", Cube, this, -1);
+    index = AddGlobalShape("test 2", Cube, this, -3);
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
 
@@ -164,8 +180,38 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
     //	ReadPixel(); //uncomment when you are reading from the z-buffer
 }
 
+float Project::calculateCameraDistance(SceneShape shp)
+{
+    Eigen::Vector3f cameraPos = renderer->cameraPos;
+    Eigen::Vector3f shapePos = shp.getCurrentPosition();
+    return (shapePos - cameraPos).norm();
+}
+
+void Project::updateFarShapes()
+{
+    for (int indx : farShapes)
+    {
+        SetShapeShader(indx, basicShaderIndx);
+    }
+    farShapes.clear();
+    for (SceneShape shp : shapesGlobal)
+    {
+        if (shp.getIndex() == cubeMapIndx || shp.getIndex() == pickingPlaneIndx)
+        {
+            continue;
+        }
+        float dist = calculateCameraDistance(shp);
+        if (dist > farCoeff)
+        {
+            SetShapeShader(shp.getIndex(), blurShaderIndx);
+            farShapes.push_back(shp.getIndex());
+        }
+    }
+}
+
 void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, const Eigen::Matrix4f &Model, unsigned int shaderIndx, unsigned int shapeIndx)
 {
+    updateFarShapes();
     Shader *s = shaders[shaderIndx];
     long ctime;
     if (isActive)

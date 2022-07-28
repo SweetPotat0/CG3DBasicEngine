@@ -39,10 +39,15 @@ public:
     Renderer *GetRenderer() { return renderer; }
     int DISPLAY_WIDTH;
     int DISPLAY_HEIGHT;
+
     float bizPoint[3] = {0,0,0};
     std::vector<Eigen::Vector3f> bizPoints;
     float start_end_time[2] = { 0, max_time };
-
+    std::vector<int> farShapes;
+    void updateFarShapes();
+    float calculateCameraDistance(SceneShape shp);
+    float farCoeff = 20;
+    void ModeChange();
 
 private:
     Renderer *renderer = nullptr;

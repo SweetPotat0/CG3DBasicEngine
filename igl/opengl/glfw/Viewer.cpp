@@ -647,6 +647,7 @@ namespace igl
 
                     if (button == 0)
                     {
+                        std::cout << "we are here" << std::endl;
                         //                if (selected_data_index > 0 )
                         WhenRotate(scnMat * cameraMat, -((float)xrel / 180) / movCoeff, ((float)yrel / 180) / movCoeff);
                     }
@@ -730,17 +731,23 @@ namespace igl
             void Viewer::WhenRotate(const Eigen::Matrix4d &preMat, float dx, float dy)
             {
                 Movable *obj;
-                if (selected_data_index == 0 || data()->IsStatic())
-                    obj = (Movable *)this;
-                else
+                // if (selected_data_index == 0 || data()->IsStatic())
+                //     obj = (Movable *)this;
+                // else
+                // {
+                //     int ps = selected_data_index;
+                //     for (; parents[ps] > -1; ps = parents[ps])
+                //         ;
+                //     obj = (Movable *)data_list[ps];
+                // }
+                for (size_t i = 0; i < pShapes.size(); i++)
                 {
-                    int ps = selected_data_index;
-                    for (; parents[ps] > -1; ps = parents[ps])
-                        ;
-                    obj = (Movable *)data_list[ps];
+                    data_list[pShapes[i]]->RotateInSystem(Eigen::Vector3d(0, 1, 0), dx);
+                    data_list[pShapes[i]]->RotateInSystem(Eigen::Vector3d(1, 0, 0), dy);
                 }
-                obj->RotateInSystem(Eigen::Vector3d(0, 1, 0), dx);
-                obj->RotateInSystem(Eigen::Vector3d(1, 0, 0), dy);
+                
+                // obj->RotateInSystem(Eigen::Vector3d(0, 1, 0), dx);
+                // obj->RotateInSystem(Eigen::Vector3d(1, 0, 0), dy);
                 WhenRotate(dx, dy);
             }
 
@@ -784,7 +791,7 @@ namespace igl
                     Eigen::Vector4d pos = MVP * Model * Eigen::Vector4d(0, 0, 0, 1);
                     float xpix = (1 + pos.x() / pos.z()) * viewport.z() / 2;
                     float ypix = (1 + pos.y() / pos.z()) * viewport.w() / 2;
-                    if (data_list[i]->Is2Render(viewportIndx) && xpix < right && xpix > left && ypix < bottom && ypix > up && ((Project*)this)->shapesGlobal[i].getLayer()->getIsVisible())
+                    if (data_list[i]->Is2Render(viewportIndx) && xpix < right && xpix > left && ypix < bottom && ypix > up && ((Project *)this)->shapesGlobal[i].getLayer()->getIsVisible())
                     {
                         pShapes.push_back(i);
                         data_list[i]->AddViewport(newViewportIndx);

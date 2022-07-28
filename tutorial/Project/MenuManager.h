@@ -24,6 +24,7 @@ public:
             scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT, 2);
             // Set viewport 3 to all screen
             scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT, 3);
+            // scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT, 4);
             // Set camera relation
             for (size_t i = 0; i < scn->GetRenderer()->GetCameras().size(); i++)
             {
@@ -40,6 +41,7 @@ public:
             scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH / 2, scn->DISPLAY_HEIGHT, 2);
             // Set viewport 3 to all screen
             scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH / 2, scn->DISPLAY_HEIGHT, 3);
+            // scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH / 2, scn->DISPLAY_HEIGHT, 4);
             // Set camera relation
             for (size_t i = 0; i < scn->GetRenderer()->GetCameras().size(); i++)
             {
@@ -47,15 +49,16 @@ public:
             }
             break;
         case CameraSplitMode::split_y:
-            // Set viewport 0 to all screen
-            scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT / 2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 0);
             // Set viewport 1 to 0
+            scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT / 2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 0);
+            // Set viewport 0 to all screen
             scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 1);
             // PICKING Viewports:
             // Set viewport 2 to all screen
-            scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT / 2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 2);
+            scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT, 2);
             // Set viewport 3 to all screen
-            scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT / 2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 3);
+            scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT/2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 3);
+            // scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT / 2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 4);
             // Set camera relation
             for (size_t i = 0; i < scn->GetRenderer()->GetCameras().size(); i++)
             {
