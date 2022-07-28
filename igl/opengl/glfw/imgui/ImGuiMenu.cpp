@@ -342,6 +342,8 @@ namespace igl
                             MenuManager::OnTransparentToggled(isAllTransparent, (Project *)viewer);
                         }
 
+                        ImGui::SliderFloat("Far Value",&scn->far,scn->GetRenderer()->GetNear(0),scn->GetRenderer()->GetFar(0));
+
                         if (ImGui::Checkbox("Set Blur", &viewer->data()->isBlur))
                         {
                             MenuManager::OnBlurToggled(viewer->data()->isBlur, (Project *)viewer);

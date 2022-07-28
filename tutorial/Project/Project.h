@@ -16,6 +16,7 @@ public:
     void Animate() override;
     void ScaleAllShapes(float amt, int viewportIndx);
     void SetRenderer(Renderer *renderer);
+    Renderer* GetRenderer();
     void SetParent(int shape, int newParent);
     int GetParent(int shape);
     void SetMenu(igl::opengl::glfw::imgui::ImGuiMenu *menu);
@@ -39,6 +40,10 @@ public:
     Renderer *GetRenderer() { return renderer; }
     int DISPLAY_WIDTH;
     int DISPLAY_HEIGHT;
+    std::vector<int> farShapes;
+    void updateFarShapes();
+    float far;
+    float calculateCameraDistance(SceneShape shp);
 
 private:
     Renderer *renderer = nullptr;
