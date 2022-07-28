@@ -9,7 +9,7 @@ class Project : public igl::opengl::glfw::Viewer
 public:
     Project();
     //	Project(float angle,float relationWH,float near, float far);
-    void Init();
+    void Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT);
     void Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, const Eigen::Matrix4f &Model, unsigned int shaderIndx, unsigned int shapeIndx);
     void WhenRotate();
     void WhenTranslate();
@@ -35,12 +35,15 @@ public:
     void ChangeCubeMap(std::string file_name);
     void NextCubeMap();
     long globalTime;
-    std::vector<Layer*> layers;
+    std::vector<Layer *> layers;
+    Renderer *GetRenderer() { return renderer; }
+    int DISPLAY_WIDTH;
+    int DISPLAY_HEIGHT;
 
 private:
     Renderer *renderer = nullptr;
-    int AddGlobalShapeFromFile(std::string name, std::string file_name, int parent, Viewer* viewer);
-    int AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType, Viewer* viewer, int parent, int viewPort);
+    int AddGlobalShapeFromFile(std::string name, std::string file_name, int parent, Viewer *viewer, int viewPort);
+    int AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType, Viewer *viewer, int parent, int viewPort);
 
     bool animating;
 };

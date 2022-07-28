@@ -3,7 +3,7 @@
 #include <chrono>
 #include "./igl/file_dialog_open.h"
 
-Layer* defaultLayer = new Layer(true, "default", std::vector<int>());
+Layer *defaultLayer = new Layer(true, "default", std::vector<int>());
 
 static void printMat(const Eigen::Matrix4d &mat)
 {
@@ -36,7 +36,7 @@ bool Project::Load_Shape_From_File(
                                            Eigen::Vector3f(-10, -10, -100),
                                            Eigen::Vector3f(4, 4, 0)};
 
-    int index = AddGlobalShapeFromFile("file: " + indxFile++, mesh_file_name_string, -1, this);
+    int index = AddGlobalShapeFromFile("file: " + indxFile++, mesh_file_name_string, -1, this, 0);
     SetShapeShader(index, 2);
     SetShapeMaterial(index, 2);
     std::cout << "Load mesh from file: " << mesh_file_name_string << std::endl;
@@ -56,27 +56,41 @@ void Project::SetMenu(igl::opengl::glfw::imgui::ImGuiMenu *menu)
     this->menu = menu;
 }
 
-int Project::AddGlobalShapeFromFile(std::string name, std::string file_name, int parent, Viewer* viewer)
+// Project::Project(float angle ,float relationWH, float near, float far) : Scene(angle,relationWH,near,far)
+//{
+// }
+
+int Project::AddGlobalShapeFromFile(std::string name, std::string file_name, int parent, Viewer *viewer, int viewPort = 0)
 {
-    int index = AddShapeFromFile(file_name, parent, TRIANGLES);
+    int index = AddShapeFromFile(file_name, parent, TRIANGLES, viewPort);
+    if (viewPort == 0)
+    {
+        SetShapeViewport(index, 1);
+    }
     SceneShape scnShape(name, MeshCopy, defaultLayer, index, viewer);
     scnShape.setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
     shapesGlobal.push_back(scnShape);
     return index;
 }
 
-int Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType, 
-    Viewer* viewer, int parent, int viewPort = 0)
+int Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,
+                            Viewer *viewer, int parent, int viewPort = 0)
 {
     int index = AddShape(shapeType, parent, TRIANGLES, viewPort);
+    if (viewPort == 0)
+    {
+        SetShapeViewport(index, 1);
+    }
     SceneShape scnShape(name, shapeType, defaultLayer, index, viewer);
     scnShape.setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
     shapesGlobal.push_back(scnShape);
     return index;
 }
 
-void Project::Init()
+void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
 {
+    this->DISPLAY_WIDTH = DISPLAY_WIDTH;
+    this->DISPLAY_HEIGHT = DISPLAY_HEIGHT;
     layers.push_back(defaultLayer);
     globalTime = 0;
     unsigned int texIDs[4] = {0, 1, 2, 3};
@@ -108,27 +122,24 @@ void Project::Init()
                                               Eigen::Vector3f(0, 0, 0)};
     std::vector<Eigen::Vector3f> point = {Eigen::Vector3f(0, 2, 0)};
 
-
     // Cube map -->
 
-    cubeMapIndx = AddGlobalShape("cubeMap", Cube, this , -2 );
+    cubeMapIndx = AddGlobalShape("cubeMap", Cube, this, -2);
     SetShapeShader(cubeMapIndx, cubemapShaderIndx);
     SetShapeMaterial(cubeMapIndx, dayLight3DMatIndx);
 
-//    selected_data_index = cubeMap.getIndex();
+    selected_data_index = cubeMapIndx;
     ShapeTransformation(scaleAll, 150, 0);
     SetShapeStatic(cubeMapIndx);
-
 
     // End cubeMap
     // Picking plane -->
 
-
-    pickingPlaneIndx = AddGlobalShape("Picking plane", Plane, this, -2, 1);
+    pickingPlaneIndx = AddGlobalShape("Picking plane", Plane, this, -2, 2);
     SetShapeShader(pickingPlaneIndx, pickingShaderIndx);
     SetShapeMaterial(pickingPlaneIndx, plane2DMatIndx);
 
-    //    selected_data_index = pickingPlane.getIndex();
+    selected_data_index = pickingPlaneIndx;
     ShapeTransformation(zTranslate, -1.1, 1);
 
     SetShapeStatic(pickingPlaneIndx);
@@ -143,22 +154,16 @@ void Project::Init()
     shapesGlobal[index].addBiz(BizMovment(pointsRev, 1000, 1500), &max_time);
     shapesGlobal[index].move(2, y);
 
-
     index = AddGlobalShape("test 1", Cube, this, -1);
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
     shapesGlobal[index].move(2, x);
 
-
-    index = AddGlobalShape("test 2", Cube, this,-1);
+    index = AddGlobalShape("test 2", Cube, this, -1);
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
 
-    
-    shapesGlobal[selected_data_index].move(-1,y);
-
-
-
+    shapesGlobal[selected_data_index].move(-1, y);
 
     /*selected_data_index = shp1.getIndex();
     animating = true;*/
@@ -171,19 +176,22 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
 {
     Shader *s = shaders[shaderIndx];
     long ctime;
-    if (isActive) {
+    if (isActive)
+    {
         ++globalTime;
         ctime = globalTime;
     }
     else
         ctime = time;
-    
-    if (shapeIndx != cubeMapIndx && shapeIndx != pickingPlaneIndx) {
+
+    if (shapeIndx != cubeMapIndx && shapeIndx != pickingPlaneIndx)
+    {
         SceneShape scnShape = shapesGlobal[shapeIndx];
         Eigen::Vector3f pos = scnShape.getlastDrawnPosition();
         Eigen::Vector3f newPos = scnShape.getPosition((float)ctime);
-        if (newPos != pos) {
-        
+        if (newPos != pos)
+        {
+
             Eigen::Vector3f delta = newPos - pos;
             selected_data_index = shapeIndx;
             ShapeTransformation(xTranslate, delta(x), 0);
@@ -192,7 +200,6 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
             shapesGlobal[shapeIndx].setlastDrawnPosition(newPos);
         }
     }
-    
 
     // pickedShapes.clear();
 
@@ -200,13 +207,17 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
     s->SetUniformMat4f("Proj", Proj);
     s->SetUniformMat4f("View", View);
     s->SetUniformMat4f("Model", Model);
-    if (shapesGlobal[shapeIndx].isTransparent)
+    if (!shapesGlobal[shaderIndx].getLayer()->getIsVisible())
     {
-        s->SetUniform2f("isTransparent", 1, 0);
+        s->SetUniform2f("transparency", 0, 0);
+    }
+    else if (shapesGlobal[shapeIndx].isTransparent)
+    {
+        s->SetUniform2f("transparency", 0.4, 0);
     }
     else
     {
-        s->SetUniform2f("isTransparent", 0, 0);
+        s->SetUniform2f("transparency", 1, 0);
     }
     if (data_list[shapeIndx]->GetMaterial() >= 0 && !materials.empty())
     {
@@ -226,8 +237,8 @@ void Project::WhenTranslate()
 
 const int numOfCubeMaps = 3;
 
-std::string cubeMaps[numOfCubeMaps] = { "Daylight Box_", "grass_cubemap_",
-                                       "desert_cubemap_" };
+std::string cubeMaps[numOfCubeMaps] = {"Daylight Box_", "grass_cubemap_",
+                                       "desert_cubemap_"};
 
 int cubeMapCurrTextIndx = 0;
 
@@ -265,7 +276,7 @@ Project::~Project(void)
 {
 }
 
-void Project::SetRenderer(Renderer* renderer)
+void Project::SetRenderer(Renderer *renderer)
 {
     if (this->renderer != nullptr)
         throw std::invalid_argument("renderer cannot be set twice");

@@ -216,6 +216,14 @@ void Renderer::UpdatePress(float xpos, float ypos)
     yWhenPress = ypos;
 }
 
+void Renderer::ChangeCameraRelation(int cameraIndx,float relationWH){
+    // igl::opengl::Camera* old = cameras[cameraIndx];
+    // std::cout<<"fov: "<<old->_fov<<", "<<relationWH<<","<<old->GetNear()<<","<<old->GetFar()<<std::endl;
+    // cameras[cameraIndx] = new igl::opengl::Camera(old->_fov,relationWH, old->GetNear(), old->GetFar());
+    // delete old;
+    cameras[cameraIndx]->SetProjection(cameras[cameraIndx]->_fov,relationWH);
+}
+
 void Renderer::AddCamera(const Eigen::Vector3d& pos, float fov, float relationWH, float zNear, float zFar, int infoIndx)
 {
     if (infoIndx > 0 && infoIndx < drawInfos.size())
@@ -306,9 +314,11 @@ void Renderer::PickMany(int viewportIndx)
 		depth = scn->AddPickedShapes(cameras[0]->GetViewProjection().cast<double>() * (cameras[0]->MakeTransd()).inverse(), viewports[viewportCurrIndx], viewportCurrIndx, xMin, xMax, yMin, yMax,viewportIndx);
         if (depth != -1)
         {
+            if(depth!=0){
+                isMany = true;
+                isPicked = true;
+            }
             depth = (depth*2.0f - cameras[0]->GetFar()) / (cameras[0]->GetNear() - cameras[0]->GetFar());
-            isMany = true;
-            isPicked = true;
         }
         else
             depth = 0;
@@ -538,7 +548,12 @@ IGL_INLINE void Renderer::Init(igl::opengl::glfw::Viewer* scene, std::list<int>x
                 //}
                 drawInfos.emplace_back(new_draw_info);
             }
-            DrawInfo* temp = new DrawInfo(indx, 0, 1, 0, (int)(indx < 1) | depthTest | clearDepth | stencilTest | clearStencil | passStencil,next_property_id);
+            DrawInfo* temp;
+            if(indx==1){
+                temp = new DrawInfo(indx, 1, 1, 0, (int)(indx < 1) | depthTest | clearDepth | stencilTest | clearStencil | passStencil,next_property_id);    
+            }else{
+                temp = new DrawInfo(indx, 0, 1, 0, (int)(indx < 1) | depthTest | clearDepth | stencilTest | clearStencil | passStencil,next_property_id);
+            }
             next_property_id <<= 1;
             drawInfos.emplace_back(temp);
             indx++;

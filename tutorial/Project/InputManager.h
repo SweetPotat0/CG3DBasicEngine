@@ -7,6 +7,8 @@
 
 bool holdsLeft;
 double xStart, yStart;
+//0=LEFT/UP, 1=RIGHT/DOWN
+int ChosenScreen = 0;
 
 float normelize(float num, int maxSize)
 {
@@ -155,10 +157,10 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
 
         if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
-            rndr->UnPick(2);
+            rndr->UnPick(3);
             double xEnd, yEnd;
             glfwGetCursorPos(window, &xEnd, &yEnd);
-            rndr->PickMany(2);
+            rndr->PickMany(3);
             rndr->Pressed();
         }
     }
@@ -169,14 +171,21 @@ void glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
     Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
     Project *scn = (Project *)rndr->GetScene();
 
+    //Set chosen camera
+    //If chosen screen is 0, than we need viewport 0 so drawinfo 1=1+0 is still valid,
+    //and if screen is 1 than we need draw info 2 = 1+1
+    int ChosenCamera = scn->GetRenderer()->GetDrawCamera(ChosenScreen+1);
+
     if (rndr->IsPicked())
     {
+        std::cout<<"picked!"<<std::endl;
         rndr->UpdateZpos((int)yoffset);
         rndr->MouseProccessing(GLFW_MOUSE_BUTTON_MIDDLE);
     }
     else
     {
-        rndr->MoveCamera(0, rndr->zTranslate, (float)yoffset);
+        std::cout<<"not picked!"<<std::endl;
+        rndr->MoveCamera(ChosenCamera, rndr->zTranslate, (float)yoffset);
     }
 }
 
@@ -192,6 +201,7 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
     {
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
         {
+            std::cout<<"Unpick"<<std::endl;
             rndr->UnPick(2);
             glfwGetCursorPos(window, &xStart, &yStart);
             if (!rndr->IsPressed())
@@ -225,6 +235,12 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
 {
     Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
     Project *scn = (Project *)rndr->GetScene();
+
+    //Set chosen camera
+    //If chosen screen is 0, than we need viewport 0 so drawinfo 1=1+0 is still valid,
+    //and if screen is 1 than we need draw info 2 = 1+1
+    int ChosenCamera = scn->GetRenderer()->GetDrawCamera(ChosenScreen+1);
+    
     // rndr->FreeShapes(2);
     if (action == GLFW_PRESS || action == GLFW_REPEAT)
     {
@@ -242,21 +258,21 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
             break;
 
         case GLFW_KEY_UP:
-            rndr->MoveCamera(0, scn->xRotate, 0.05f);
+            rndr->MoveCamera(ChosenCamera, scn->xRotate, 0.05f);
 
             break;
         case GLFW_KEY_DOWN:
             // scn->shapeTransformation(scn->xGlobalRotate,-5.f);
             // cout<< "down: "<<endl;
-            rndr->MoveCamera(0, scn->xRotate, -0.05f);
+            rndr->MoveCamera(ChosenCamera, scn->xRotate, -0.05f);
             break;
         case GLFW_KEY_LEFT:
-            rndr->MoveCamera(0, scn->yRotate, 0.05f);
+            rndr->MoveCamera(ChosenCamera, scn->yRotate, 0.05f);
             break;
         case GLFW_KEY_RIGHT:
             // scn->shapeTransformation(scn->xGlobalRotate,-5.f);
             // cout<< "down: "<<endl;
-            rndr->MoveCamera(0, scn->yRotate, -0.5f);
+            rndr->MoveCamera(ChosenCamera, scn->yRotate, -0.5f);
             break;
         case GLFW_KEY_U:
             rndr->MoveCamera(0, scn->yTranslate, 0.25f);
@@ -275,33 +291,33 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
             movePickedObjects(-0.02, y, scn);
             break;
         case GLFW_KEY_L:
-            rndr->MoveCamera(0, scn->xTranslate, -0.25f);
+            rndr->MoveCamera(ChosenCamera, scn->xTranslate, -0.25f);
             break;
         case GLFW_KEY_K:
             scn->NextCubeMap();
             break;
         case GLFW_KEY_R:
-            rndr->MoveCamera(0, scn->xTranslate, 0.25f);
+            rndr->MoveCamera(ChosenCamera, scn->xTranslate, 0.25f);
             break;
 
         case GLFW_KEY_B:
-            rndr->MoveCamera(0, scn->zTranslate, 0.5f);
+            rndr->MoveCamera(ChosenCamera, scn->zTranslate, 0.5f);
             break;
         case GLFW_KEY_F:
-            rndr->MoveCamera(0, scn->zTranslate, -0.5f);
+            rndr->MoveCamera(ChosenCamera, scn->zTranslate, -0.5f);
             break;
         case GLFW_KEY_T:
         {
-            rndr->MoveCamera(0, 100, 0);
+            rndr->MoveCamera(ChosenCamera, 100, 0);
             break;
         }
         case GLFW_KEY_O:
         {
             Eigen::Vector3f center = FindCenterOfPickedObjects(scn);
-            rndr->MoveCamera(0, 100, 0);
-            rndr->MoveCamera(0, scn->xTranslate, center.x());
-            rndr->MoveCamera(0, scn->yTranslate, center.y());
-            rndr->MoveCamera(0, scn->zTranslate, center.z());
+            rndr->MoveCamera(ChosenCamera, 100, 0);
+            rndr->MoveCamera(ChosenCamera, scn->xTranslate, center.x());
+            rndr->MoveCamera(ChosenCamera, scn->yTranslate, center.y());
+            rndr->MoveCamera(ChosenCamera, scn->zTranslate, center.z());
             /*if (!scn->pickedShapes.empty())
                 std::cout << scn->pickedShapes.front() << std::endl;*/
             // rndr->MoveCamera(0, scn->zTranslate, -0.5f);
@@ -337,6 +353,12 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
         case GLFW_KEY_MINUS:
             std::cout << "minus" << std::endl;
             scalePickedObjects(0.9, w, scn);
+            break;
+        case GLFW_KEY_LEFT_SHIFT:
+            ChosenScreen = 0;
+            break;
+        case GLFW_KEY_RIGHT_SHIFT:
+            ChosenScreen = 1;
             break;
         default:
             break;

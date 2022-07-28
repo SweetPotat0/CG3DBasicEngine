@@ -15,13 +15,52 @@ public:
         switch (splitMode)
         {
         case CameraSplitMode::no_split:
-            // implement
+            // Set viewport 0 to all screen
+            scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT, 0);
+            // Set viewport 1 to 0
+            scn->GetRenderer()->SetViewport(0, 0, 0, 0, 1);
+            // PICKING Viewports:
+            // Set viewport 2 to all screen
+            scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT, 2);
+            // Set viewport 3 to all screen
+            scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT, 3);
+            // Set camera relation
+            for (size_t i = 0; i < scn->GetRenderer()->GetCameras().size(); i++)
+            {
+                scn->GetRenderer()->ChangeCameraRelation(i, (float)scn->DISPLAY_WIDTH / (float)scn->DISPLAY_HEIGHT);
+            }
             break;
         case CameraSplitMode::split_x:
-            // implement
+            // Set viewport 0 to all screen
+            scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH / 2, scn->DISPLAY_HEIGHT, 0);
+            // Set viewport 1 to 0
+            scn->GetRenderer()->SetViewport(scn->DISPLAY_WIDTH / 2, 0, scn->DISPLAY_WIDTH / 2, scn->DISPLAY_HEIGHT, 1);
+            // PICKING Viewports:
+            // Set viewport 2 to all screen
+            scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH / 2, scn->DISPLAY_HEIGHT, 2);
+            // Set viewport 3 to all screen
+            scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH / 2, scn->DISPLAY_HEIGHT, 3);
+            // Set camera relation
+            for (size_t i = 0; i < scn->GetRenderer()->GetCameras().size(); i++)
+            {
+                scn->GetRenderer()->ChangeCameraRelation(i, (float)scn->DISPLAY_WIDTH / (float)scn->DISPLAY_HEIGHT / 2);
+            }
             break;
         case CameraSplitMode::split_y:
-            // implement
+            // Set viewport 0 to all screen
+            scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT / 2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 0);
+            // Set viewport 1 to 0
+            scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 1);
+            // PICKING Viewports:
+            // Set viewport 2 to all screen
+            scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT / 2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 2);
+            // Set viewport 3 to all screen
+            scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT / 2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 3);
+            // Set camera relation
+            for (size_t i = 0; i < scn->GetRenderer()->GetCameras().size(); i++)
+            {
+                scn->GetRenderer()->ChangeCameraRelation(i, (float)scn->DISPLAY_WIDTH / ((float)scn->DISPLAY_HEIGHT / 2));
+            }
             break;
         default:
             // error
@@ -56,7 +95,23 @@ public:
 
     static void OnAddCamera(std::string camera_name, Project *scn)
     {
-        std::cout << "added camera" << camera_name << std::endl;
+        const float CAMERA_ANGLE = 45.0f;
+        const float NEAR = 1.0f;
+        const float FAR = 120.0f;
+        scn->GetRenderer()->AddCamera(Eigen::Vector3d(0, 0, -10), CAMERA_ANGLE, (float)scn->DISPLAY_WIDTH / (float)scn->DISPLAY_HEIGHT / 2, NEAR, FAR);
+    }
+
+    static void OnSetCamera(int screenIndx, int cameraIndx, Project *scn)
+    {
+        if (screenIndx == 0)
+        {
+            scn->GetRenderer()->SetDrawCamera(0, cameraIndx);
+            scn->GetRenderer()->SetDrawCamera(1, cameraIndx);
+        }
+        else if (screenIndx == 1)
+        {
+            scn->GetRenderer()->SetDrawCamera(2, cameraIndx);
+        }
     }
 
     static void OnAddLayer(std::string layer_name, bool is_shown, Project *scn)
@@ -84,7 +139,8 @@ public:
         Layer *changedLayer;
         for (size_t i = 0; i < scn->layers.size(); i++)
         {
-            if(scn->layers[i]->getName() == layer_name){
+            if (scn->layers[i]->getName() == layer_name)
+            {
                 changedLayer = scn->layers[i];
                 break;
             }

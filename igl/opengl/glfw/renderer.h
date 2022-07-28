@@ -117,6 +117,8 @@ public:
     void AddCamera(const Eigen::Vector3d &pos, float fov, float relationWH, float zNear, float zFar,
                    int infoIndx = -1);
 
+    void Renderer::ChangeCameraRelation(int cameraIndx,float relationWH);
+
     void AddViewport(int left, int bottom, int width, int height);
 
     unsigned int AddBuffer(int infoIndx);
@@ -149,7 +151,13 @@ public:
 
     inline Eigen::Matrix4f GetProjection(int cameraIndex) {return cameras[cameraIndex]->GetViewProjection();}
 
+    inline std::vector<igl::opengl::Camera*> GetCameras() {return cameras;}
+
     inline void SetDrawFlag(int infoIndx, unsigned int flag) { drawInfos[infoIndx]->SetFlags(flag); }
+
+    inline void SetDrawCamera(int infoIndx, unsigned int cameraIndx) { drawInfos[infoIndx]->SetCamera(cameraIndx); }
+
+    inline int GetDrawCamera(int infoIndx) { return drawInfos[infoIndx]->cameraIndx; }
 
     inline void ClearDrawFlag(int infoIndx, unsigned int flag) { drawInfos[infoIndx]->ClearFlags(flag); }
 

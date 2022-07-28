@@ -213,7 +213,7 @@ namespace igl
                         {
                             // int savedIndx = viewer->selected_data_index;
                             // viewer->open_dialog_load_mesh();
-                            ((Project*)viewer)->my_open_dialog_load_mesh();
+                            ((Project *)viewer)->my_open_dialog_load_mesh();
                             // if (viewer->data_list.size() > viewer->parents.size())
                             // {
                             //     viewer->parents.push_back(-1);
@@ -283,14 +283,14 @@ namespace igl
 
                     if (ImGui::CollapsingHeader("Layers", ImGuiTreeNodeFlags_DefaultOpen))
                     {
-                        for (size_t i = 0; i < ((Project*)viewer)->layers.size(); i++)
+                        for (size_t i = 0; i < ((Project *)viewer)->layers.size(); i++)
                         {
-                            bool isVisible = (((Project*)viewer)->layers.at(i)->getIsVisible());
-                            if (ImGui::Checkbox((((Project*)viewer)->layers.at(i)->getName()).c_str(),
+                            bool isVisible = (((Project *)viewer)->layers.at(i)->getIsVisible());
+                            if (ImGui::Checkbox((((Project *)viewer)->layers.at(i)->getName()).c_str(),
                                                 &isVisible))
                             {
-                                std::cout << "layer changed:" << (((Project*)viewer)->layers.at(i))->getIsVisible() << std::endl;
-                                MenuManager::OnLayerChange((((Project*)viewer)->layers.at(i)->getName()), isVisible, (Project *)viewer);
+                                std::cout << "layer changed:" << (((Project *)viewer)->layers.at(i))->getIsVisible() << std::endl;
+                                MenuManager::OnLayerChange((((Project *)viewer)->layers.at(i)->getName()), isVisible, (Project *)viewer);
                             }
                         }
                         ImGui::InputText("", viewer->data()->layer_name);
@@ -335,7 +335,7 @@ namespace igl
                                 isAllTransparent = false;
                                 break;
                             }
-                        }                        
+                        }
 
                         if (ImGui::Checkbox("Set Transparent", &isAllTransparent))
                         {
@@ -351,19 +351,19 @@ namespace igl
 
                         // Set layer to picked objects
 
-                        std::string tempLayerSetStr = ((Project*)viewer)->layers.at(viewer->data()->layerSetIndex)->getName();
+                        std::string tempLayerSetStr = ((Project *)viewer)->layers.at(viewer->data()->layerSetIndex)->getName();
                         const char *current_layer_set_item = tempLayerSetStr.c_str();
                         if (ImGui::BeginCombo("##layers set combo", current_layer_set_item))
                         {
-                            for (size_t n = 0; n < ((Project*)viewer)->layers.size(); n++)
+                            for (size_t n = 0; n < ((Project *)viewer)->layers.size(); n++)
                             {
-                                bool is_selected = strcmp(current_layer_set_item, ((Project*)viewer)->layers.at(n)->getName().c_str()) == 0;
+                                bool is_selected = strcmp(current_layer_set_item, ((Project *)viewer)->layers.at(n)->getName().c_str()) == 0;
                                 // std::cout << "compare: " << std::string(current_layer_set_item) << " with " << ("material" + (std::to_string(n))).c_str() << std::endl;
-                                if (ImGui::Selectable(((Project*)viewer)->layers.at(n)->getName().c_str(), is_selected))
+                                if (ImGui::Selectable(((Project *)viewer)->layers.at(n)->getName().c_str(), is_selected))
                                 {
-                                    current_layer_set_item = ((Project*)viewer)->layers.at(n)->getName().c_str();
+                                    current_layer_set_item = ((Project *)viewer)->layers.at(n)->getName().c_str();
                                     viewer->data()->layerSetIndex = n;
-                                    MenuManager::OnSetLayer(((Project*)viewer)->layers.at(n)->getName(), (Project *)viewer);
+                                    MenuManager::OnSetLayer(((Project *)viewer)->layers.at(n)->getName(), (Project *)viewer);
                                 }
                                 if (is_selected)
                                 {
@@ -401,6 +401,7 @@ namespace igl
                                 {
                                     current_item = viewer->data()->cameras.at(n).c_str();
                                     viewer->data()->cameraScreen1Indx = n;
+                                    MenuManager::OnSetCamera(0, n, (Project *)viewer);
                                     std::cout << "Selected in combo: " << current_item << std::endl;
                                 }
                                 if (is_selected)
@@ -423,6 +424,7 @@ namespace igl
                                 {
                                     current_item2 = viewer->data()->cameras.at(n).c_str();
                                     viewer->data()->cameraScreen2Indx = n;
+                                    MenuManager::OnSetCamera(1, n, (Project *)viewer);
                                     std::cout << "Selected in combo: " << current_item2 << std::endl;
                                 }
                                 if (is_selected)
@@ -451,14 +453,14 @@ namespace igl
                                 viewer->Activate();
                             else
                                 viewer->Deactivate();
-                            //viewer->Animate();
+                            // viewer->Animate();
                         }
 
                         // Adding to viewer time param
                         if (ImGui::CollapsingHeader("Animation time", ImGuiTreeNodeFlags_DefaultOpen))
                         {
                             Project *project = (Project *)viewer;
-                            //ImGui::DragFloat("Max time ", &(project->max_time), 0.05f, 0.0f, 100.0f, "%.0f");
+                            // ImGui::DragFloat("Max time ", &(project->max_time), 0.05f, 0.0f, 100.0f, "%.0f");
                             if (ImGui::SliderFloat("Time Scale", &(project->time), 0, (project)->max_time, "%.1f"))
                             {
                                 std::cout << project->time << std::endl;

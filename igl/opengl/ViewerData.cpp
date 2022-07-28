@@ -25,7 +25,6 @@ IGL_INLINE igl::opengl::ViewerData::ViewerData()
       show_faces(~unsigned(0)),
       show_lines(~unsigned(0)),
       face_based(false),
-      camera_split(0),
       double_sided(false),
       invert_normals(false),
       show_overlay(~unsigned(0)),
@@ -47,7 +46,8 @@ IGL_INLINE igl::opengl::ViewerData::ViewerData()
       isStatic(false)
 
 {
-    cameras.push_back("Main Camera");
+    cameras.push_back("Camera 1");
+    cameras.push_back("Camera 2");
     layers.push_back(Layer("Default layer", true));
     clear();
 };

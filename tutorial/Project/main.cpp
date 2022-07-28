@@ -10,35 +10,34 @@ int main(int argc, char *argv[])
     const float CAMERA_ANGLE = 45.0f;
     const float NEAR = 1.0f;
     const float FAR = 120.0f;
-    const int infoIndx = 2;
     std::list<int> x, y;
+    x.push_back(DISPLAY_WIDTH / 2);
     x.push_back(DISPLAY_WIDTH);
     y.push_back(DISPLAY_HEIGHT);
     Display disp = Display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OPENGL");
     igl::opengl::glfw::imgui::ImGuiMenu *menu = new igl::opengl::glfw::imgui::ImGuiMenu();
-    Renderer *rndr = new Renderer(CAMERA_ANGLE, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT, NEAR, FAR);
+    Renderer *rndr = new Renderer(CAMERA_ANGLE, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT / 2, NEAR, FAR);
     Project *scn = new Project(); // initializing scene
-
+    
+    rndr->AddCamera(Eigen::Vector3d(0, 0, 3), CAMERA_ANGLE, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT / 2, NEAR, FAR);
+    
     scn->SetMenu(menu);
 
-    Eigen::Matrix4f projection = rndr->GetProjection(0);
-
-
     Init(disp, menu);               // adding callback functions
-    scn->Init();                    // adding shaders, textures, shapes to scene
+    scn->Init(DISPLAY_WIDTH,DISPLAY_HEIGHT);                    // adding shaders, textures, shapes to scene
     rndr->Init(scn, x, y, 1, menu); // adding scene and viewports to the renderer
     scn->SetRenderer(rndr);
     disp.SetRenderer(rndr);
 
-    rndr->AddViewport(-1, 1, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-    rndr->AddViewport(-1, 1, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-    rndr->CopyDraw(1, rndr->viewport, 1);
-    rndr->ClearDrawFlag(2, rndr->toClear | rndr->stencilTest);
-    rndr->SetDrawFlag(2, rndr->blend | rndr->inAction2 | rndr->scissorTest);
+    rndr->AddViewport(0, 0, DISPLAY_WIDTH / 2, DISPLAY_HEIGHT);
+    rndr->AddViewport(0, 0, DISPLAY_WIDTH / 2, DISPLAY_HEIGHT);
+    rndr->CopyDraw(2, rndr->viewport, 2);
+    rndr->ClearDrawFlag(3, rndr->toClear | rndr->stencilTest);
+    rndr->SetDrawFlag(3, rndr->blend | rndr->inAction2 | rndr->scissorTest);
 
     // the picking viewport:
     // first apply the "pickingShader" with a blend that creates a glow over the picked objects
-    rndr->AddDraw(2, 0, 3, 0, rndr->blend | rndr->scaleAbit | rndr->depthTest | rndr->onPicking);
+    rndr->AddDraw(3, 0, 3, 0, rndr->blend | rndr->scaleAbit | rndr->depthTest | rndr->onPicking);
 
     // second apply the "pickingShader" with a stencil test that creates a frame over the picked objects
     //    rndr->AddDraw(1 , 0, 3, 0,   rndr->stencilTest | rndr->stencil2 | rndr->scaleAbit | rndr-> depthTest | rndr->onPicking);

@@ -272,11 +272,11 @@ public:
   // Enable per-face or per-vertex properties
   bool face_based;
 
-  int camera_split;//0- no split, 1- split-y, 2- split-x
+  int camera_split = 1;//0- no split,1- split-x, 2- split-y 
 
     int cameraScreen1Indx = 0;
     
-    int cameraScreen2Indx = 0;
+    int cameraScreen2Indx = 1;
 
     std::vector<std::string> cameras;
 
