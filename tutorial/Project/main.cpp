@@ -31,15 +31,15 @@ int main(int argc, char *argv[])
 
     rndr->AddViewport(0, 0, DISPLAY_WIDTH / 2, DISPLAY_HEIGHT);
     rndr->AddViewport(0, 0, DISPLAY_WIDTH / 2, DISPLAY_HEIGHT);
-    // rndr->AddViewport(0, 0, DISPLAY_WIDTH / 2, DISPLAY_HEIGHT); // <-------------------
+    rndr->AddViewport(0, 0, DISPLAY_WIDTH / 2, DISPLAY_HEIGHT); // <-------------------
     rndr->CopyDraw(2, rndr->viewport, 2);
     rndr->ClearDrawFlag(3, rndr->toClear | rndr->stencilTest);
     rndr->SetDrawFlag(3, rndr->blend | rndr->inAction2 | rndr->scissorTest);
 
     // the picking viewport:
     // first apply the "pickingShader" with a blend that creates a glow over the picked objects
-    rndr->AddDraw(3, 0, 3, 0, rndr->blend | rndr->scaleAbit | rndr->depthTest | rndr->onPicking);
-    // rndr->AddDraw(4, 0, 3, 0, rndr->blend | rndr->scaleAbit | rndr->depthTest | rndr->onPicking);// <-------------------
+    rndr->AddDraw(3, 0, 3, 0, rndr->blend | rndr->scaleAbit | rndr->depthTest | rndr->onPicking | rndr->stencil2 | rndr->stencilTest);
+    rndr->AddDraw(4, 0, 3, 0, rndr->blend | rndr->scaleAbit | rndr->depthTest | rndr->onPicking); // <-------------------
 
     // second apply the "pickingShader" with a stencil test that creates a frame over the picked objects
     //    rndr->AddDraw(1 , 0, 3, 0,   rndr->stencilTest | rndr->stencil2 | rndr->scaleAbit | rndr-> depthTest | rndr->onPicking);
