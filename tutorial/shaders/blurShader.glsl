@@ -5,9 +5,9 @@ in vec3 normal0;
 in vec3 color0;
 in vec3 position0;
 in float shapeIndx;
-in float r;//Radius of blur
 in float sigma;
 in vec2 texResolution;
+in float r;//Radius of blur
 
 uniform vec4 lightColor;
 uniform sampler2D sampler1;
@@ -37,15 +37,19 @@ void main()
         float relY = y-startPos.y;
         float expMone=relX*relX+relY*relY;
         float expMehane=2*sigma*sigma;
-        weight=gConstant*exp(-expMone/expMehane);
+        weight = gConstant * exp(-expMone/expMehane);
         vec2 texC = toTexCoords(vec2(x,y));
-        col+=texture2D(sampler1,clamp(texC,0,1))*weight;
+        col += texture2D(sampler1,clamp(texC,0,1)) * weight;
         if(x>=startPos.x+r){
             y++;
             x = startPos.x-r;
         }else{
             x++;
         }        
+    }
+    float minCol = 0.05;
+    if(col.x < minCol && col.y < minCol && col.z < minCol){
+        col = texture2D(sampler1,texCoord0);
     }
     Color=col;
 }

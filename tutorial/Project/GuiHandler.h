@@ -1,6 +1,8 @@
+#pragma once
+
 #include "Project.h"
 
-class MenuManager
+class GuiHandler
 {
 public:
     enum CameraSplitMode
@@ -57,7 +59,7 @@ public:
             // Set viewport 2 to all screen
             scn->GetRenderer()->SetViewport(0, 0, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT, 2);
             // Set viewport 3 to all screen
-            scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT/2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 3);
+            scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT / 2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 3);
             // scn->GetRenderer()->SetViewport(0, scn->DISPLAY_HEIGHT / 2, scn->DISPLAY_WIDTH, scn->DISPLAY_HEIGHT / 2, 4);
             // Set camera relation
             for (size_t i = 0; i < scn->GetRenderer()->GetCameras().size(); i++)
@@ -76,7 +78,7 @@ public:
         for (size_t i = 0; i < scn->pShapes.size(); i++)
         {
             int shapeIndx = scn->pShapes[i];
-            scn->shapesGlobal[shapeIndx].isTransparent = isTransparent;
+            scn->shapesGlobal[shapeIndx]->isTransparent = isTransparent;
         }
     }
 
@@ -150,9 +152,9 @@ public:
         }
         for (int shapeIndex : scn->pShapes)
         {
-            scn->shapesGlobal[shapeIndex].getLayer()->removeShape(shapeIndex);
-            scn->shapesGlobal[shapeIndex].changeLayer(changedLayer);
-            scn->shapesGlobal[shapeIndex].getLayer()->addShape(shapeIndex);
+            scn->shapesGlobal[shapeIndex]->getLayer()->removeShape(shapeIndex);
+            scn->shapesGlobal[shapeIndex]->changeLayer(changedLayer);
+            scn->shapesGlobal[shapeIndex]->getLayer()->addShape(shapeIndex);
         }
     }
     static void OnSelectMaterial(int material_inx, Project *scn)
@@ -168,28 +170,54 @@ public:
     {
         scn->globalTime = 0;
     }
-    static void onAddPoint(float point[3], Project* scn) {
+
+    static void onAddPoint(float point[3], Project *scn)
+    {
         scn->bizPoints.push_back(Eigen::Vector3f(point[0], point[1], point[2]));
         std::cout << "point added: (" << point[0] << "," << point[1] << "," << point[2] << ")" << std::endl;
         scn->bizPoint[0] = 0;
         scn->bizPoint[1] = 0;
         scn->bizPoint[2] = 0;
     }
-    static void onAddBiz(float times[2], Project* scn) {
+
+    static void onAddBiz(float times[2], Project *scn)
+    {
         BizMovment movment = BizMovment(scn->bizPoints, times[0], times[1]);
         scn->bizPoints.clear();
-        for (int i : scn->pShapes) {
+        for (int i : scn->pShapes)
+        {
             std::cout << "Bezier movment added to shape: " << i << std::endl;
-            scn->shapesGlobal[i].addBiz(movment,&(scn->max_time));
+            scn->shapesGlobal[i]->addBiz(movment, &(scn->max_time));
         }
         scn->start_end_time[0] = 0;
         scn->start_end_time[1] = scn->max_time;
     }
-    static void onRemoveBiz(Project* scn) {
-        for (int i : scn->pShapes) {
+
+    static void onRemoveBiz(Project *scn)
+    {
+        for (int i : scn->pShapes)
+        {
             std::cout << "Bezier movment removed from shape: " << i << std::endl;
-            scn->shapesGlobal[i].clearBiz();
+            scn->shapesGlobal[i]->clearBiz();
         }
     }
-    
+
+    static void onSetChilds(std::vector<int> childs, Project *scn)
+    {
+        if (scn->pShapes.size() != 1)
+        {
+            std::cout << "error, cant set childs to more than one parent" << std::endl;
+            return;
+        }
+        SceneShape *parent = scn->shapesGlobal[scn->pShapes[0]];
+        for (int i : childs)
+        {
+            SceneShape *child = scn->shapesGlobal[i];
+            if (child->getParent() != nullptr)
+            {
+                child->getParent()->removeChild(child);
+            }
+            child->setParent(parent);
+        }
+    }
 };

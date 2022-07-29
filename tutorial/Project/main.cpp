@@ -1,7 +1,7 @@
 #include "igl/opengl/glfw/renderer.h"
 #include "Project.h"
 #include "InputManager.h"
-#include "MenuManager.h"
+#include "GuiHandler.h"
 
 int main(int argc, char *argv[])
 {

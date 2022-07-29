@@ -25,7 +25,7 @@ public:
     IGL_INLINE void my_open_dialog_load_mesh();
     void Play();
     float time = 0;
-    std::vector<SceneShape> shapesGlobal;
+    std::vector<SceneShape*> shapesGlobal;
     int cubeMapIndx = -1;
     int pickingPlaneIndx = -1;
     int blurShaderIndx = -1;
@@ -45,7 +45,7 @@ public:
     float start_end_time[2] = { 0, max_time };
     std::vector<int> farShapes;
     void updateFarShapes();
-    float calculateCameraDistance(SceneShape shp);
+    float calculateCameraDistance(SceneShape *shp);
     float farCoeff = 20;
     void ModeChange();
 

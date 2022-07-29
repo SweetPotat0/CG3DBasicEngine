@@ -296,6 +296,8 @@ public:
 
     bool isBlur = false;
 
+    std::vector<int> selectedTempChilds;
+
     std::vector<bool> selectedShapesTransparent;
 
   // Enable double-sided lighting on faces

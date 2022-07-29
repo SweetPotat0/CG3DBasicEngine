@@ -1,9 +1,10 @@
-#pragma once // maybe should be static class
+#pragma once
 #include "igl/opengl/glfw/Display.h"
 #include "igl/opengl/glfw/renderer.h"
 #include "Project.h"
 #include "imgui/imgui.h"
 #include "SceneShape.h"
+#include "GuiHandler.h"
 #include <math.h>
 
 bool holdsLeft;
@@ -29,7 +30,7 @@ Eigen::Vector3f FindCenterOfPickedObjects(Project *scn)
 
         for (int shapeIndex : scn->pShapes)
         { // chaneg to picked shapes
-            averagePos += scn->shapesGlobal[shapeIndex].getCurrentPosition();
+            averagePos += scn->shapesGlobal[shapeIndex]->getCurrentPosition();
         }
         averagePos /= shapesCount;
         averagePos -= Eigen::Vector3f(0, 0, zoomInCenter);
@@ -43,7 +44,7 @@ void scalePickedObjects(double shiftSize, directions d, Project *scn)
 {
     for (int i : scn->pShapes)
     {
-        scn->shapesGlobal[i].Scale(shiftSize, d);
+        scn->shapesGlobal[i]->Scale(shiftSize, d);
     }
 }
 
@@ -104,7 +105,7 @@ void movePickedObjects(double shiftSize, directions d, Project *scn)
 {
     for (int i : scn->pShapes)
     {
-        scn->shapesGlobal[i].move(shiftSize, d);
+        scn->shapesGlobal[i]->move(shiftSize, d);
     }
 }
 
@@ -131,7 +132,7 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
 
         if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
-            
+
             double xEnd, yEnd;
             glfwGetCursorPos(window, &xEnd, &yEnd);
             rndr->PickMany(3);
@@ -184,20 +185,7 @@ void glfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
         }
         else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
         {
-
-            // std::cout<<"xpos: "<<xpos<<", xStart: "<<xStart<<", yPos: "<<ypos<<"yStart"
-            // for(int indx : scn->pShapes){
-            //     if (abs(xpos-xStart)>=abs(ypos-yStart)){
-            //         std::cout<<"XPOS: "<<xpos<<" XSTART: "<<xStart<<std::endl;
-            //         scn->data_list[indx]->MyRotate(Eigen::Vector3d(0, 1, 0), 0.03, 1);
-
-            //     }else{
-            //         scn->data_list[indx]->MyRotate(Eigen::Vector3d(1, 0, 0), 0.03, 1);
-
-            //     }
             rndr->MouseProccessing(GLFW_MOUSE_BUTTON_LEFT);
-
-            // }
         }
         else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && rndr->IsPressed())
         {
@@ -231,9 +219,6 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
     {
         switch (key)
         {
-        case GLFW_KEY_Q:
-            scn->ModeChange();
-            break;
         case GLFW_KEY_ESCAPE:
             glfwSetWindowShouldClose(window, GLFW_TRUE);
             break;
@@ -243,6 +228,7 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
                 scn->Deactivate();
             else
                 scn->Activate();
+            GuiHandler::OnPlayChanged(scn->isActive, scn);
             break;
 
         case GLFW_KEY_UP:
@@ -258,11 +244,11 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
         case GLFW_KEY_RIGHT:
             rndr->MoveCamera(ChosenCamera, scn->yRotate, -0.05f);
             break;
-        case GLFW_KEY_D:
+        case GLFW_KEY_W:
             if (rndr->IsPicked())
-                movePickedObjects(0.02, x, scn);
+                movePickedObjects(0.02, y, scn);
             else
-                rndr->MoveCamera(ChosenCamera, scn->xTranslate, 0.25f);
+                rndr->MoveCamera(ChosenCamera, scn->yTranslate, 0.25f);
             break;
         case GLFW_KEY_A:
             if (rndr->IsPicked())
@@ -270,27 +256,32 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
             else
                 rndr->MoveCamera(ChosenCamera, scn->xTranslate, -0.25f);
             break;
-        case GLFW_KEY_W:
-            if (rndr->IsPicked())
-                movePickedObjects(0.02, y, scn);
-            else
-                rndr->MoveCamera(ChosenCamera, scn->yTranslate, 0.25f);
-            break;
         case GLFW_KEY_S:
             if (rndr->IsPicked())
                 movePickedObjects(-0.02, y, scn);
             else
                 rndr->MoveCamera(ChosenCamera, scn->yTranslate, -0.25f);
             break;
-        case GLFW_KEY_K:
+        case GLFW_KEY_D:
+            if (rndr->IsPicked())
+                movePickedObjects(0.02, x, scn);
+            else
+                rndr->MoveCamera(ChosenCamera, scn->xTranslate, 0.25f);
+            break;
+        case GLFW_KEY_E:
+            movePickedObjects(+0.02, z, scn);
+            break;
+        case GLFW_KEY_R:
+            movePickedObjects(-0.02, z, scn);
+        case GLFW_KEY_C:
             scn->NextCubeMap();
             break;
-        case GLFW_KEY_T:
+        case GLFW_KEY_G:
         {
             rndr->MoveCamera(ChosenCamera, 100, 0);
             break;
         }
-        case GLFW_KEY_O:
+        case GLFW_KEY_F:
         {
             Eigen::Vector3f center = FindCenterOfPickedObjects(scn);
             rndr->MoveCamera(ChosenCamera, 100, 0);
@@ -299,41 +290,15 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
             rndr->MoveCamera(ChosenCamera, scn->zTranslate, center.z());
             break;
         }
-        case GLFW_KEY_X:
-            movePickedObjects(+0.02, z, scn);
-            break;
-        case GLFW_KEY_Z:
-            movePickedObjects(-0.02, z, scn);
-            break;
-        case GLFW_KEY_1:
-            scalePickedObjects(1.1, x, scn);
-            break;
-        case GLFW_KEY_2:
-            scalePickedObjects(0.9, x, scn);
-            break;
-        case GLFW_KEY_3:
-            scalePickedObjects(1.1, y, scn);
-            break;
-        case GLFW_KEY_4:
-            scalePickedObjects(0.9, y, scn);
-            break;
-        case GLFW_KEY_5:
-            scalePickedObjects(1.1, z, scn);
-            break;
-        case GLFW_KEY_6:
-            scalePickedObjects(0.9, z, scn);
-            break;
-        case GLFW_KEY_EQUAL:
-            scalePickedObjects(1.1, w, scn);
-            break;
-        case GLFW_KEY_MINUS:
-            scalePickedObjects(0.9, w, scn);
-            break;
-        case GLFW_KEY_LEFT_SHIFT:
+        break;
+        case GLFW_KEY_LEFT_CONTROL:
             ChosenScreen = 0;
             break;
-        case GLFW_KEY_RIGHT_SHIFT:
+        case GLFW_KEY_RIGHT_CONTROL:
             ChosenScreen = 1;
+            break;
+        case GLFW_KEY_M:
+            scn->ModeChange();
             break;
         default:
             break;

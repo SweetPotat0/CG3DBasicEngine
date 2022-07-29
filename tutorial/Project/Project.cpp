@@ -2,9 +2,9 @@
 #include <iostream>
 #include <chrono>
 #include "./igl/file_dialog_open.h"
+#include "./GuiHandler.h"
 
 Layer *defaultLayer = new Layer(true, "default", std::vector<int>());
-
 
 IGL_INLINE void Project::my_open_dialog_load_mesh()
 {
@@ -46,17 +46,19 @@ void Project::SetMenu(igl::opengl::glfw::imgui::ImGuiMenu *menu)
     this->menu = menu;
 }
 
-void Project::ModeChange() {
-    for (int i : pShapes) {
-        SceneShape shp = shapesGlobal[i];
-        int mode = data_list[shp.getIndex()]->mode;
+void Project::ModeChange()
+{
+    for (int i : pShapes)
+    {
+        SceneShape *shp = shapesGlobal[i];
+        int mode = data_list[shp->getIndex()]->mode;
 
-        if (mode == 4) {
-            data_list[shp.getIndex()]->mode = 1;
+        if (mode == 4)
+        {
+            data_list[shp->getIndex()]->mode = 1;
         }
-        else 
-            data_list[shp.getIndex()]->mode = 4;
-        
+        else
+            data_list[shp->getIndex()]->mode = 4;
     }
 }
 
@@ -71,8 +73,8 @@ int Project::AddGlobalShapeFromFile(std::string name, std::string file_name, int
     {
         SetShapeViewport(index, 1);
     }
-    SceneShape scnShape(name, MeshCopy, defaultLayer, index, viewer);
-    scnShape.setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
+    SceneShape *scnShape = new SceneShape(name, MeshCopy, defaultLayer, index, viewer);
+    scnShape->setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
     shapesGlobal.push_back(scnShape);
     return index;
 }
@@ -85,8 +87,8 @@ int Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes 
     {
         SetShapeViewport(index, 1);
     }
-    SceneShape scnShape(name, shapeType, defaultLayer, index, viewer);
-    scnShape.setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
+    SceneShape *scnShape = new SceneShape(name, shapeType, defaultLayer, index, viewer);
+    scnShape->setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
     shapesGlobal.push_back(scnShape);
     return index;
 }
@@ -116,19 +118,18 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
 
     int box2DMatIndx = AddMaterial(&boxTexIndx, slots + 2, 1);
     int plane2DMatIndx = AddMaterial(&planeTexIndx, slots + 3, 1);
-    
 
-    std::vector<Eigen::Vector3f> points = { Eigen::Vector3f(0, 0, 0),
-                                           Eigen::Vector3f(0, 10, 0) };
+    std::vector<Eigen::Vector3f> points = {Eigen::Vector3f(0, 0, 0),
+                                           Eigen::Vector3f(0, 10, 0)};
 
-    std::vector<Eigen::Vector3f> jumpUpBiz = { Eigen::Vector3f(0, 0, 0),
-                                           Eigen::Vector3f(0, 10, 0) };
-    std::vector<Eigen::Vector3f> jumpDownBiz = { Eigen::Vector3f(0, 0, 0),
-                                           Eigen::Vector3f(0, -10, 0) };
-    std::vector<Eigen::Vector3f> jumpRightBiz = { Eigen::Vector3f(0, 0, 0),
-                                           Eigen::Vector3f(10, 0, 0) };
-    std::vector<Eigen::Vector3f> jumpLeftBiz = { Eigen::Vector3f(0, 0, 0),
-                                           Eigen::Vector3f(-10, 0, 0) };
+    std::vector<Eigen::Vector3f> jumpUpBiz = {Eigen::Vector3f(0, 0, 0),
+                                              Eigen::Vector3f(0, 10, 0)};
+    std::vector<Eigen::Vector3f> jumpDownBiz = {Eigen::Vector3f(0, 0, 0),
+                                                Eigen::Vector3f(0, -10, 0)};
+    std::vector<Eigen::Vector3f> jumpRightBiz = {Eigen::Vector3f(0, 0, 0),
+                                                 Eigen::Vector3f(10, 0, 0)};
+    std::vector<Eigen::Vector3f> jumpLeftBiz = {Eigen::Vector3f(0, 0, 0),
+                                                Eigen::Vector3f(-10, 0, 0)};
 
     // Cube map -->
 
@@ -157,33 +158,27 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
     index = AddGlobalShape("test", Cube, this, -1);
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
-    shapesGlobal[index].addBiz(BizMovment(points, 0, 500), &max_time);
-    //shapesGlobal[index].addBiz(BizMovment(point, 500, 1000), &max_time);
-    //shapesGlobal[index].addBiz(BizMovment(pointsRev, 1000, 1500), &max_time);
-    shapesGlobal[index].move(2, y);
+    shapesGlobal[index]->addBiz(BizMovment(points, 0, 500), &max_time);
+    // shapesGlobal[index].addBiz(BizMovment(point, 500, 1000), &max_time);
+    // shapesGlobal[index].addBiz(BizMovment(pointsRev, 1000, 1500), &max_time);
+    shapesGlobal[index]->move(2, y);
 
     index = AddGlobalShape("test 1", Cube, this, -4);
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
-    shapesGlobal[index].move(2, x);
+    shapesGlobal[index]->move(2, x);
 
     index = AddGlobalShape("test 2", Cube, this, -3);
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
 
-    shapesGlobal[selected_data_index].move(-1, y);
-
-    /*selected_data_index = shp1.getIndex();
-    animating = true;*/
-
-    // SetShapeViewport(6, 1);
-    //	ReadPixel(); //uncomment when you are reading from the z-buffer
+    shapesGlobal[selected_data_index]->move(-1, y);
 }
 
-float Project::calculateCameraDistance(SceneShape shp)
+float Project::calculateCameraDistance(SceneShape *shp)
 {
     Eigen::Vector3f cameraPos = renderer->cameraPos;
-    Eigen::Vector3f shapePos = shp.getCurrentPosition();
+    Eigen::Vector3f shapePos = shp->getCurrentPosition();
     return (shapePos - cameraPos).norm();
 }
 
@@ -194,17 +189,18 @@ void Project::updateFarShapes()
         SetShapeShader(indx, basicShaderIndx);
     }
     farShapes.clear();
-    for (SceneShape shp : shapesGlobal)
+    for (SceneShape *shp : shapesGlobal)
     {
-        if (shp.getIndex() == cubeMapIndx || shp.getIndex() == pickingPlaneIndx)
+        if (shp->getIndex() == cubeMapIndx || shp->getIndex() == pickingPlaneIndx)
         {
             continue;
         }
         float dist = calculateCameraDistance(shp);
         if (dist > farCoeff)
         {
-            SetShapeShader(shp.getIndex(), blurShaderIndx);
-            farShapes.push_back(shp.getIndex());
+            SetShapeShader(shp->getIndex(), blurShaderIndx);
+            shp->blurC = (dist - 4) / 16;
+            farShapes.push_back(shp->getIndex());
         }
     }
 }
@@ -216,8 +212,14 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
     long ctime;
     if (isActive)
     {
+        if (data()->camera_split != 0)
+        {
+            data()->camera_split = 0;
+            GuiHandler::OnCameraSplitChange(0, this);
+        }
         ++globalTime;
-        if (globalTime >= max_time) {
+        if (globalTime >= max_time)
+        {
             globalTime = max_time;
             Deactivate();
         }
@@ -228,20 +230,21 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
 
     if (shapeIndx != cubeMapIndx && shapeIndx != pickingPlaneIndx)
     {
-        SceneShape scnShape = shapesGlobal[shapeIndx];
-        Eigen::Vector3f pos = scnShape.getlastDrawnPosition();
-        Eigen::Vector3f newPos = scnShape.getPosition((float)ctime);
+        SceneShape *scnShape = shapesGlobal[shapeIndx];
+        Eigen::Vector3f pos = scnShape->getlastDrawnPosition();
+        Eigen::Vector3f newPos = scnShape->getPosition((float)ctime);
         if (newPos != pos)
         {
-
             Eigen::Vector3f delta = newPos - pos;
             selected_data_index = shapeIndx;
             ShapeTransformation(xTranslate, delta(x), 0);
             ShapeTransformation(yTranslate, delta(y), 0);
             ShapeTransformation(zTranslate, delta(z), 0);
-            shapesGlobal[shapeIndx].setlastDrawnPosition(newPos);
+            shapesGlobal[shapeIndx]->setlastDrawnPosition(newPos);
         }
     }
+
+    s->SetUniform2f("vsR", (int)(shapesGlobal[shapeIndx]->blurC * 30) + 10, 0);
 
     // pickedShapes.clear();
 
@@ -249,11 +252,11 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
     s->SetUniformMat4f("Proj", Proj);
     s->SetUniformMat4f("View", View);
     s->SetUniformMat4f("Model", Model);
-    if (!shapesGlobal[shaderIndx].getLayer()->getIsVisible())
+    if (!shapesGlobal[shaderIndx]->getLayer()->getIsVisible())
     {
         s->SetUniform2f("transparency", 0, 0);
     }
-    else if (shapesGlobal[shapeIndx].isTransparent)
+    else if (shapesGlobal[shapeIndx]->isTransparent)
     {
         s->SetUniform2f("transparency", 0.4, 0);
     }

@@ -68,9 +68,13 @@ public:
     int getIndex();
     void addBiz(BizMovment biz, float *max_time);
     void clearBiz();
-    Eigen::Vector3f getPosition(float time);
-    Eigen::Vector3f getlastDrawnPosition();
-    void setlastDrawnPosition(Eigen::Vector3f pos);
+    Eigen::Vector3f getBizPosition(float time);
+    Eigen::Vector3f getlastBizPosition();
+    void setlastBizPosition(Eigen::Vector3f pos);
+    Eigen::Vector3f getDesignPosition();
+    void setDesignPosition(Eigen::Vector3f pos);
+    Eigen::Vector3f getCurrentPositionAt(float time);
+    Eigen::Vector3f getCurrentPosition();
     std::string getName() { return name; };
     SceneShape* getParent();
     void removeParent();
@@ -78,8 +82,8 @@ public:
     void addChild(SceneShape* child);
     void removeChild(SceneShape* child);
     std::vector<SceneShape*> getChildren();
-    Eigen::Vector3f getCurrentPositionAt(float time);
-    Eigen::Vector3f getCurrentPosition();
+    
+    float blurC = 0;
     bool isTransparent = false;
     void SceneShape::Scale(double shiftSize, directions d);
 
@@ -91,10 +95,13 @@ private:
     igl::opengl::glfw::Viewer::shapes type;
     std::vector<BizMovment> movement;
     Eigen::Vector3f currentPosition;
+    Eigen::Vector3f lastBizPosition;
+    Eigen::Vector3f designPosition;
+
     igl::opengl::glfw::Viewer* viewer;
     Layer* layer;
     int index;
-    Eigen::Vector3f lastDrawnPosition;
+    
     SceneShape* parent;
     std::vector<SceneShape*> children;
 
