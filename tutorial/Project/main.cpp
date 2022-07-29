@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     Renderer *rndr = new Renderer(CAMERA_ANGLE, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT / 2, NEAR, FAR);
     Project *scn = new Project(); // initializing scene
 
-    rndr->AddCamera(Eigen::Vector3d(0, 0, 3), CAMERA_ANGLE, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT / 2, NEAR, FAR);
+    rndr->AddCamera(Eigen::Vector3d(1, 0, 10), CAMERA_ANGLE, (float)DISPLAY_WIDTH / (float)DISPLAY_HEIGHT / 2, NEAR, FAR);
 
     scn->SetMenu(menu);
 

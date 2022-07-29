@@ -73,32 +73,12 @@ namespace igl
                 overlay_point_shader = nullptr;
                 overlay_shader = nullptr;
 
-                // Temporary variables initialization
-                // down = false;
-                //  hack_never_moved = true;
                 scroll_position = 0.0f;
                 SetShader_overlay("shaders/overlay");
                 SetShader_point_overlay("shaders/overlay_points");
 
                 // Per face
                 data()->set_face_based(false);
-
-                //#ifndef IGL_VIEWER_VIEWER_QUIET
-                //    const std::string usage(R"(igl::opengl::glfw::Viewer usage:
-                //  [drag]  Rotate scene
-                //  A,a     Toggle animation (tight draw loop)
-                //  F,f     Toggle face based
-                //  I,i     Toggle invert normals
-                //  L,l     Toggle wireframe
-                //  O,o     Toggle orthographic/perspective projection
-                //  T,t     Toggle filled faces
-                //  [,]     Toggle between cameras
-                //  1,2     Toggle between models
-                //  ;       Toggle vertex labels
-                //  :       Toggle face labels)"
-                //);
-                //    std::cout<<usage<<std::endl;
-                //#endif
             }
 
             IGL_INLINE Viewer::~Viewer()
@@ -176,17 +156,11 @@ namespace igl
                     }
                     else if (corner_normals.rows() > 0)
                     {
-                        // std::cout << "normals: \n" << corner_normals << std::endl;
-                        // std::cout << "indices: \n" << fNormIndices << std::endl;
                         N = Eigen::RowVector3d(0, 0, 1).replicate(fNormIndices.rows(), 1);
                         for (size_t k = 0; k < N.rows(); k++)
                         {
                             N.row(k) = corner_normals.row(fNormIndices(k, 0));
-                            // std::cout << "faces normals:  " << corner_normals.row(fNormIndices(k, 0)) << std::endl;
                         }
-
-                        std::cout << "faces normals: \n"
-                                  << N << std::endl;
 
                         normal_read = true;
                     }
@@ -647,8 +621,6 @@ namespace igl
 
                     if (button == 0)
                     {
-                        std::cout << "we are here" << std::endl;
-                        //                if (selected_data_index > 0 )
                         WhenRotate(scnMat * cameraMat, -((float)xrel / 180) / movCoeff, ((float)yrel / 180) / movCoeff);
                     }
                     else
@@ -745,7 +717,7 @@ namespace igl
                     data_list[pShapes[i]]->RotateInSystem(Eigen::Vector3d(0, 1, 0), dx);
                     data_list[pShapes[i]]->RotateInSystem(Eigen::Vector3d(1, 0, 0), dy);
                 }
-                
+
                 // obj->RotateInSystem(Eigen::Vector3d(0, 1, 0), dx);
                 // obj->RotateInSystem(Eigen::Vector3d(1, 0, 0), dy);
                 WhenRotate(dx, dy);
@@ -791,7 +763,7 @@ namespace igl
                     Eigen::Vector4d pos = MVP * Model * Eigen::Vector4d(0, 0, 0, 1);
                     float xpix = (1 + pos.x() / pos.z()) * viewport.z() / 2;
                     float ypix = (1 + pos.y() / pos.z()) * viewport.w() / 2;
-                    if (data_list[i]->Is2Render(viewportIndx) && xpix < right && xpix > left && ypix < bottom && ypix > up && ((Project *)this)->shapesGlobal[i]->getLayer()->getIsVisible())
+                    if (data_list[i]->Is2Render(viewportIndx) && xpix < right && xpix > left && ypix < bottom && ypix > up && ((Project *)this)->sceneObjects[i]->getLayer()->getIsVisible())
                     {
                         pShapes.push_back(i);
                         data_list[i]->AddViewport(newViewportIndx);
@@ -852,17 +824,6 @@ namespace igl
                     s->SetUniformMat4f("Proj", Proj);
                     s->SetUniformMat4f("View", View);
                     s->SetUniformMat4f("Model", Model);
-                }
-            }
-
-            void Viewer::SetParent(int indx, int newValue, bool savePosition)
-            {
-                parents[indx] = newValue;
-                if (savePosition)
-                {
-                    Eigen::Vector4d tmp = data_list[newValue]->MakeTransd() * (data_list[indx]->MakeTransd()).inverse() * Eigen::Vector4d(0, 0, 0, 1);
-                    data_list[indx]->ZeroTrans();
-                    data_list[indx]->MyTranslate(-tmp.head<3>(), false);
                 }
             }
 

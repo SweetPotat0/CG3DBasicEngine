@@ -1,6 +1,5 @@
 #include "Project.h"
 #include <iostream>
-#include <chrono>
 #include "./igl/file_dialog_open.h"
 #include "./GuiHandler.h"
 
@@ -13,30 +12,19 @@ IGL_INLINE void Project::my_open_dialog_load_mesh()
     if (fname.length() == 0)
         return;
 
-    Load_Shape_From_File(fname.c_str());
+    LoadMeshFromFile(fname.c_str());
 }
 
 int indxFile = 0;
 
-bool Project::Load_Shape_From_File(
+bool Project::LoadMeshFromFile(
     const std::string &mesh_file_name_string)
 {
-    std::vector<Eigen::Vector3f> points = {Eigen::Vector3f(4, 4, 0),
-                                           Eigen::Vector3f(0, 20, 0),
-                                           Eigen::Vector3f(-10, -10, -100),
-                                           Eigen::Vector3f(4, 4, 0)};
-
-    int index = AddGlobalShapeFromFile("file: " + indxFile++, mesh_file_name_string, -1, this, 0);
+    int index = AddShapeObjectFromFile("file: " + indxFile++, mesh_file_name_string, -1, this, 0);
     SetShapeShader(index, 2);
     SetShapeMaterial(index, 2);
     std::cout << "Load mesh from file: " << mesh_file_name_string << std::endl;
     return true;
-}
-
-long getCurrentUnixTime()
-{
-    const auto p1 = std::chrono::system_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(p1.time_since_epoch()).count();
 }
 
 Project::Project() {}
@@ -46,51 +34,46 @@ void Project::SetMenu(igl::opengl::glfw::imgui::ImGuiMenu *menu)
     this->menu = menu;
 }
 
-void Project::ModeChange()
+void Project::TextureModeChange()
 {
     for (int i : pShapes)
     {
-        SceneShape *shp = shapesGlobal[i];
-        int mode = data_list[shp->getIndex()]->mode;
-
-        if (mode == 4)
+        SceneObject *shp = sceneObjects[i];
+        int shpIndx = shp->getIndex();
+        if (data_list[shpIndx]->mode == TRIANGLES)
         {
-            data_list[shp->getIndex()]->mode = 1;
+            data_list[shpIndx]->mode = LINES;
         }
         else
-            data_list[shp->getIndex()]->mode = 4;
+            data_list[shpIndx]->mode = TRIANGLES;
     }
 }
 
-// Project::Project(float angle ,float relationWH, float near, float far) : Scene(angle,relationWH,near,far)
-//{
-// }
-
-int Project::AddGlobalShapeFromFile(std::string name, std::string file_name, int parent, Viewer *viewer, int viewPort = 0)
+int Project::AddShapeObjectFromFile(std::string name, std::string file_name, int parent, Viewer *viewer, int viewPort = 0)
 {
-    int index = AddShapeFromFile(file_name, parent, TRIANGLES, viewPort);
+    int shpIndx = AddShapeFromFile(file_name, parent, TRIANGLES, viewPort);
     if (viewPort == 0)
     {
-        SetShapeViewport(index, 1);
+        SetShapeViewport(shpIndx, 1);
     }
-    SceneShape *scnShape = new SceneShape(name, MeshCopy, defaultLayer, index, viewer);
+    SceneObject *scnShape = new SceneObject(name, MeshCopy, defaultLayer, shpIndx, viewer);
     scnShape->setlastBizPosition(Eigen::Vector3f(0, 0, 0));
-    shapesGlobal.push_back(scnShape);
-    return index;
+    sceneObjects.push_back(scnShape);
+    return shpIndx;
 }
 
-int Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,
+int Project::AddShapeObject(std::string name, igl::opengl::glfw::Viewer::shapes shapeType,
                             Viewer *viewer, int parent, int viewPort = 0)
 {
-    int index = AddShape(shapeType, parent, TRIANGLES, viewPort);
+    int shpIndx = AddShape(shapeType, parent, TRIANGLES, viewPort);
     if (viewPort == 0)
     {
-        SetShapeViewport(index, 1);
+        SetShapeViewport(shpIndx, 1);
     }
-    SceneShape *scnShape = new SceneShape(name, shapeType, defaultLayer, index, viewer);
+    SceneObject *scnShape = new SceneObject(name, shapeType, defaultLayer, shpIndx, viewer);
     scnShape->setlastBizPosition(Eigen::Vector3f(0, 0, 0));
-    shapesGlobal.push_back(scnShape);
-    return index;
+    sceneObjects.push_back(scnShape);
+    return shpIndx;
 }
 
 void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
@@ -99,7 +82,6 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
     this->DISPLAY_WIDTH = DISPLAY_WIDTH;
     this->DISPLAY_HEIGHT = DISPLAY_HEIGHT;
     layers.push_back(defaultLayer);
-    // Maybe needs -1
     globalTime = 0;
     unsigned int texIDs[4] = {0, 1, 2, 3};
     unsigned int slots[4] = {0, 1, 2, 3};
@@ -122,18 +104,8 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
     std::vector<Eigen::Vector3f> points = {Eigen::Vector3f(0, 0, 0),
                                            Eigen::Vector3f(0, 10, 0)};
 
-    std::vector<Eigen::Vector3f> jumpUpBiz = {Eigen::Vector3f(0, 0, 0),
-                                              Eigen::Vector3f(0, 10, 0)};
-    std::vector<Eigen::Vector3f> jumpDownBiz = {Eigen::Vector3f(0, 0, 0),
-                                                Eigen::Vector3f(0, -10, 0)};
-    std::vector<Eigen::Vector3f> jumpRightBiz = {Eigen::Vector3f(0, 0, 0),
-                                                 Eigen::Vector3f(10, 0, 0)};
-    std::vector<Eigen::Vector3f> jumpLeftBiz = {Eigen::Vector3f(0, 0, 0),
-                                                Eigen::Vector3f(-10, 0, 0)};
-
     // Cube map -->
-
-    cubeMapIndx = AddGlobalShape("cubeMap", Cube, this, -2);
+    cubeMapIndx = AddShapeObject("cubeMap", Cube, this, -2);
     SetShapeShader(cubeMapIndx, cubemapShaderIndx);
     SetShapeMaterial(cubeMapIndx, dayLight3DMatIndx);
 
@@ -144,7 +116,7 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
     // End cubeMap
     // Picking plane -->
 
-    pickingPlaneIndx = AddGlobalShape("Picking plane", Plane, this, -2, 2);
+    pickingPlaneIndx = AddShapeObject("Picking plane", Plane, this, -2, 2);
     SetShapeShader(pickingPlaneIndx, pickingShaderIndx);
     SetShapeMaterial(pickingPlaneIndx, plane2DMatIndx);
 
@@ -155,27 +127,27 @@ void Project::Init(int DISPLAY_WIDTH, int DISPLAY_HEIGHT)
 
     // Picking plane End
     int index;
-    index = AddGlobalShape("test", Cube, this, -1);
+    index = AddShapeObject("test", Octahedron, this, -1);
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
-    shapesGlobal[index]->addBiz(BizMovment(points, 0, 500), &max_time);
-    // shapesGlobal[index].addBiz(BizMovment(point, 500, 1000), &max_time);
-    // shapesGlobal[index].addBiz(BizMovment(pointsRev, 1000, 1500), &max_time);
-    shapesGlobal[index]->move(2, y);
+    sceneObjects[index]->addBiz(BezMovment(points, 0, 500), &max_time);
+    sceneObjects[index]->move(1, y);
+    sceneObjects[index]->move(3, x);
 
-    index = AddGlobalShape("test 1", Cube, this, -4);
+    index = AddShapeObject("test 1", Cube, this, -4);
+    SetShapeShader(index, basicShaderIndx);
+    SetShapeMaterial(index, grass2DMatIndx);
+    sceneObjects[index]->move(2, x);
+    sceneObjects[index]->move(2, z);
+
+    index = AddShapeObject("test 2", Cube, this, -3);
     SetShapeShader(index, basicShaderIndx);
     SetShapeMaterial(index, box2DMatIndx);
-    shapesGlobal[index]->move(2, x);
 
-    index = AddGlobalShape("test 2", Cube, this, -3);
-    SetShapeShader(index, basicShaderIndx);
-    SetShapeMaterial(index, box2DMatIndx);
-
-    shapesGlobal[selected_data_index]->move(-1, y);
+    sceneObjects[selected_data_index]->move(-1, y);
 }
 
-float Project::calculateCameraDistance(SceneShape *shp)
+float Project::calcDistanceFromCam(SceneObject *shp)
 {
     Eigen::Vector3f cameraPos = renderer->cameraPos;
     Eigen::Vector3f shapePos = shp->getCurrentPosition();
@@ -189,13 +161,13 @@ void Project::updateFarShapes()
         SetShapeShader(indx, basicShaderIndx);
     }
     farShapes.clear();
-    for (SceneShape *shp : shapesGlobal)
+    for (SceneObject *shp : sceneObjects)
     {
         if (shp->getIndex() == cubeMapIndx || shp->getIndex() == pickingPlaneIndx)
         {
             continue;
         }
-        float dist = calculateCameraDistance(shp);
+        float dist = calcDistanceFromCam(shp);
         if (dist > farCoeff)
         {
             SetShapeShader(shp->getIndex(), blurShaderIndx);
@@ -214,7 +186,8 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
     {
         if (shapeIndx == cubeMapIndx)
             ++globalTime;
-        if (globalTime >= max_time) {
+        if (globalTime >= max_time)
+        {
             globalTime = max_time;
             Deactivate();
         }
@@ -226,7 +199,7 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
     if (shapeIndx != cubeMapIndx && shapeIndx != pickingPlaneIndx)
     {
 
-        SceneShape* scnShape = shapesGlobal[shapeIndx];
+        SceneObject *scnShape = sceneObjects[shapeIndx];
         Eigen::Vector3f pos = scnShape->getCurrentPosition();
         Eigen::Vector3f bizPos = scnShape->getCurrentPositionAt((float)ctime);
         Eigen::Vector3f newPos = scnShape->getDesignPosition() + bizPos;
@@ -243,19 +216,17 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
         }
     }
 
-    s->SetUniform2f("vsR", (int)(shapesGlobal[shapeIndx]->blurC * 30) + 10, 0);
-
-    // pickedShapes.clear();
+    s->SetUniform2f("vsR", (int)(sceneObjects[shapeIndx]->blurC * 30) + 10, 0);
 
     s->Bind();
     s->SetUniformMat4f("Proj", Proj);
     s->SetUniformMat4f("View", View);
     s->SetUniformMat4f("Model", Model);
-    if (!shapesGlobal[shaderIndx]->getLayer()->getIsVisible())
+    if (!sceneObjects[shaderIndx]->getLayer()->getIsVisible())
     {
         s->SetUniform2f("transparency", 0, 0);
     }
-    else if (shapesGlobal[shapeIndx]->isTransparent)
+    else if (sceneObjects[shapeIndx]->isTransparent)
     {
         s->SetUniform2f("transparency", 0.4, 0);
     }
@@ -265,7 +236,6 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
     }
     if (data_list[shapeIndx]->GetMaterial() >= 0 && !materials.empty())
     {
-        //		materials[shapes[pickedShape]->GetMaterial()]->Bind(textures);
         BindMaterial(s, data_list[shapeIndx]->GetMaterial());
     }
     s->Unbind();
@@ -279,14 +249,14 @@ void Project::WhenTranslate()
 {
 }
 
-const int numOfCubeMaps = 3;
+const int numOfCubeMaps = 4;
 
 std::string cubeMaps[numOfCubeMaps] = {"Daylight Box_", "grass_cubemap_",
-                                       "desert_cubemap_"};
+                                       "desert_cubemap_","nature_cubemap_"};
 
 int cubeMapCurrTextIndx = 0;
 
-void Project::NextCubeMap()
+void Project::PassCubeMap()
 {
     cubeMapCurrTextIndx = (cubeMapCurrTextIndx + 1) % numOfCubeMaps;
     ChangeCubeMap(cubeMaps[cubeMapCurrTextIndx]);
@@ -325,25 +295,6 @@ void Project::SetRenderer(Renderer *renderer)
     if (this->renderer != nullptr)
         throw std::invalid_argument("renderer cannot be set twice");
     this->renderer = renderer;
-}
-
-void Project::SetParent(int shape, int newParent)
-{
-    //    shapesGlobal[shapesGlobal[shape].getParent()].removeChild(shape);
-    //    shapesGlobal[shape].setParent(newParent);
-    //    shapesGlobal[newParent].addChild(shape);
-}
-
-int Project::GetParent(int shape)
-{
-    //    return shapesGlobal[shape].getParent();
-    return 1;
-}
-
-std::vector<int> Project::GetChildren(int shape)
-{
-    //    return shapesGlobal[shape].getChildren();
-    return std::vector<int>();
 }
 
 void Project::Play()

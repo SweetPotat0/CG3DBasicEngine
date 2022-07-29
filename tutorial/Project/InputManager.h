@@ -3,7 +3,7 @@
 #include "igl/opengl/glfw/renderer.h"
 #include "Project.h"
 #include "imgui/imgui.h"
-#include "SceneShape.h"
+#include "SceneObject.h"
 #include "GuiHandler.h"
 #include <math.h>
 
@@ -30,7 +30,7 @@ Eigen::Vector3f FindCenterOfPickedObjects(Project *scn)
 
         for (int shapeIndex : scn->pShapes)
         { // chaneg to picked shapes
-            averagePos += scn->shapesGlobal[shapeIndex]->getCurrentPosition();
+            averagePos += scn->sceneObjects[shapeIndex]->getCurrentPosition();
         }
         averagePos /= shapesCount;
         averagePos -= Eigen::Vector3f(0, 0, zoomInCenter);
@@ -38,14 +38,6 @@ Eigen::Vector3f FindCenterOfPickedObjects(Project *scn)
         return averagePos;
     }
     return Eigen::Vector3f(0, 0, 0);
-}
-
-void scalePickedObjects(double shiftSize, directions d, Project *scn)
-{
-    for (int i : scn->pShapes)
-    {
-        scn->shapesGlobal[i]->Scale(shiftSize, d);
-    }
 }
 
 bool inside(float xStart, float yStart, float xEnd, float yEnd, float screenX, float screenY)
@@ -67,45 +59,11 @@ bool inside(float xStart, float yStart, float xEnd, float yEnd, float screenX, f
     return goodX && goodY;
 }
 
-// Viewport coords, normalized:
-//
-//  -1 -->       0 -->         1
-//  ---------------------------- -1
-//  -                          -
-//  -                          -  |
-//  -                          -  v
-//  -                          -
-//  -                          -  0
-//  -                          -
-//  -                          -  |
-//  -                          -  v
-//  -                          -
-//  ----------------------------  1
-
-// TODO check projection in point Mult scale/ratio
-// float xAngleShit(Renderer* rnd){
-//    float angle = rnd->getCameraAngle(0, x);
-//    float near = rnd->getCameraNear(0);
-//    if (angle<0){
-//        return -near * tan(abs(angle));
-//    }
-//    return near * tan(angle);
-//}
-//
-// float yAngleShit(Renderer* rnd){
-//    float angle = rnd->getCameraAngle(0, y);
-//    float near = rnd->getCameraNear(0);
-//    if (angle<0){
-//        return -near * tan(abs(angle));
-//    }
-//    return near * tan(angle);
-//}
-
 void movePickedObjects(double shiftSize, directions d, Project *scn)
 {
     for (int i : scn->pShapes)
     {
-        scn->shapesGlobal[i]->move(shiftSize, d);
+        scn->sceneObjects[i]->move(shiftSize, d);
     }
 }
 
@@ -113,7 +71,6 @@ void glfw_mouse_callback(GLFWwindow *window, int button, int action, int mods)
 {
     if (action == GLFW_PRESS)
     {
-
         Renderer *rndr = (Renderer *)glfwGetWindowUserPointer(window);
         Project *scn = (Project *)rndr->GetScene();
         if (button == GLFW_MOUSE_BUTTON_RIGHT)
@@ -212,7 +169,6 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
     // and if screen is 1 than we need draw info 2 = 1+1
     int ChosenCamera = scn->GetRenderer()->GetDrawCamera(ChosenScreen + 1);
 
-    // rndr->FreeShapes(2);
     if (action == GLFW_PRESS || action == GLFW_REPEAT)
     {
         switch (key)
@@ -272,7 +228,7 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
         case GLFW_KEY_R:
             movePickedObjects(-0.02, z, scn);
         case GLFW_KEY_C:
-            scn->NextCubeMap();
+            scn->PassCubeMap();
             break;
         case GLFW_KEY_G:
         {
@@ -296,7 +252,7 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
             ChosenScreen = 1;
             break;
         case GLFW_KEY_M:
-            scn->ModeChange();
+            scn->TextureModeChange();
             break;
         default:
             break;

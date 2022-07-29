@@ -209,11 +209,11 @@ namespace igl
                     {
                         float w = ImGui::GetContentRegionAvailWidth();
                         float p = ImGui::GetStyle().FramePadding.x;
-                        if (ImGui::Button("Load##Mesh", ImVec2((w - p) / 2.f, 0)))
+                        if (ImGui::Button("Load##Mesh", ImVec2((w - p), 0)))
                         {
                             // int savedIndx = viewer->selected_data_index;
                             // viewer->open_dialog_load_mesh();
-                            ((Project *)viewer)->my_open_dialog_load_mesh();
+                            (scn)->my_open_dialog_load_mesh();
                             // if (viewer->data_list.size() > viewer->parents.size())
                             // {
                             //     viewer->parents.push_back(-1);
@@ -223,26 +223,11 @@ namespace igl
                             //     viewer->selected_data_index = savedIndx;
                             // }
                         }
-                        ImGui::SameLine(0, p);
-                        if (ImGui::Button("Save##Mesh", ImVec2((w - p) / 2.f, 0)))
-                        {
-                            viewer->open_dialog_save_mesh();
-                        }
                     }
 
                     // Viewing options
                     if (ImGui::CollapsingHeader("Viewing Options", ImGuiTreeNodeFlags_DefaultOpen))
                     {
-                        if (ImGui::Button("Center object", ImVec2(-1, 0)))
-                        {
-                            std::cout << "not implemented yet" << std::endl;
-                            //      core[1].align_camera_center(viewer->data().V, viewer->data().F); TODO: add function like this to camera
-                        }
-                        // if (ImGui::Button("Snap canonical view", ImVec2(-1, 0)))
-                        //{
-                        //   core[1].snap_to_canonical_quaternion();
-                        // }
-
                         // Zoom
                         ImGui::PushItemWidth(80 * menu_scaling());
                         if (camera[0]->_ortho)
@@ -278,25 +263,23 @@ namespace igl
                             [&](bool value)
                             { return drawInfos[1]->set(option, value); });
                     };
-                    ImGui::ColorEdit4("Background", drawInfos[1]->Clear_RGBA.data(),
-                                      ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueWheel);
 
                     if (ImGui::CollapsingHeader("Layers", ImGuiTreeNodeFlags_DefaultOpen))
                     {
-                        for (size_t i = 0; i < ((Project *)viewer)->layers.size(); i++)
+                        for (size_t i = 0; i < (scn)->layers.size(); i++)
                         {
-                            bool isVisible = (((Project *)viewer)->layers.at(i)->getIsVisible());
-                            if (ImGui::Checkbox((((Project *)viewer)->layers.at(i)->getName()).c_str(),
+                            bool isVisible = ((scn)->layers.at(i)->getIsVisible());
+                            if (ImGui::Checkbox(((scn)->layers.at(i)->getName()).c_str(),
                                                 &isVisible))
                             {
-                                std::cout << "layer changed:" << (((Project *)viewer)->layers.at(i))->getIsVisible() << std::endl;
-                                GuiHandler::OnLayerChange((((Project *)viewer)->layers.at(i)->getName()), isVisible, (Project *)viewer);
+                                std::cout << "layer changed:" << ((scn)->layers.at(i))->getIsVisible() << std::endl;
+                                GuiHandler::OnLayerChange(((scn)->layers.at(i)->getName()), isVisible, scn);
                             }
                         }
                         ImGui::InputText("", viewer->data()->layer_name);
                         if (ImGui::Button("Add Layer"))
                         {
-                            GuiHandler::OnAddLayer(viewer->data()->layer_name, true, (Project *)viewer);
+                            GuiHandler::OnAddLayer(viewer->data()->layer_name, true, scn);
                         }
                     }
 
@@ -314,7 +297,7 @@ namespace igl
                                 {
                                     current_material_item = ("material" + (std::to_string(n))).c_str();
                                     viewer->data()->material_indx = n;
-                                    GuiHandler::OnSelectMaterial(n, (Project *)viewer);
+                                    GuiHandler::OnSelectMaterial(n, scn);
                                 }
                                 if (is_selected)
                                 {
@@ -331,7 +314,7 @@ namespace igl
                         for (size_t i = 0; i < scn->pShapes.size(); i++)
                         {
                             int pickedIndx = scn->pShapes[i];
-                            if (scn->shapesGlobal.at(pickedIndx)->isTransparent == false)
+                            if (scn->sceneObjects.at(pickedIndx)->isTransparent == false)
                             {
                                 isAllTransparent = false;
                                 break;
@@ -340,7 +323,7 @@ namespace igl
 
                         if (ImGui::Checkbox("Set Transparent", &isAllTransparent))
                         {
-                            GuiHandler::OnTransparentToggled(isAllTransparent, (Project *)viewer);
+                            GuiHandler::OnTransparentToggled(isAllTransparent, scn);
                         }
 
                         // Far blur
@@ -350,24 +333,24 @@ namespace igl
                         // Set blur
                         if (ImGui::Checkbox("Set Blur", &viewer->data()->isBlur))
                         {
-                            GuiHandler::OnBlurToggled(viewer->data()->isBlur, (Project *)viewer);
+                            GuiHandler::OnBlurToggled(viewer->data()->isBlur, scn);
                         }
 
                         // Layers
                         ImGui::Text("Set a layer:");
 
-                        std::string tempLayerSetStr = ((Project *)viewer)->layers.at(viewer->data()->layerSetIndex)->getName();
+                        std::string tempLayerSetStr = (scn)->layers.at(viewer->data()->layerSetIndex)->getName();
                         const char *current_layer_set_item = tempLayerSetStr.c_str();
                         if (ImGui::BeginCombo("##layers set combo", current_layer_set_item))
                         {
-                            for (size_t n = 0; n < ((Project *)viewer)->layers.size(); n++)
+                            for (size_t n = 0; n < (scn)->layers.size(); n++)
                             {
-                                bool is_selected = strcmp(current_layer_set_item, ((Project *)viewer)->layers.at(n)->getName().c_str()) == 0;
-                                if (ImGui::Selectable(((Project *)viewer)->layers.at(n)->getName().c_str(), is_selected))
+                                bool is_selected = strcmp(current_layer_set_item, (scn)->layers.at(n)->getName().c_str()) == 0;
+                                if (ImGui::Selectable((scn)->layers.at(n)->getName().c_str(), is_selected))
                                 {
-                                    current_layer_set_item = ((Project *)viewer)->layers.at(n)->getName().c_str();
+                                    current_layer_set_item = (scn)->layers.at(n)->getName().c_str();
                                     viewer->data()->layerSetIndex = n;
-                                    GuiHandler::OnSetLayer(((Project *)viewer)->layers.at(n)->getName(), (Project *)viewer);
+                                    GuiHandler::OnSetLayer((scn)->layers.at(n)->getName(), scn);
                                 }
                                 if (is_selected)
                                 {
@@ -403,15 +386,15 @@ namespace igl
                     {
                         if (ImGui::RadioButton("No Split", &(viewer->data()->camera_split), 0))
                         {
-                            GuiHandler::OnCameraSplitChange(GuiHandler::CameraSplitMode::no_split, (Project *)viewer);
+                            GuiHandler::OnSplitChange(0, scn);
                         }
                         if (ImGui::RadioButton("Split x", &(viewer->data()->camera_split), 1))
                         {
-                            GuiHandler::OnCameraSplitChange(GuiHandler::CameraSplitMode::split_x, (Project *)viewer);
+                            GuiHandler::OnSplitChange(1, scn);
                         }
                         if (ImGui::RadioButton("Split y", &(viewer->data()->camera_split), 2))
                         {
-                            GuiHandler::OnCameraSplitChange(GuiHandler::CameraSplitMode::split_y, (Project *)viewer);
+                            GuiHandler::OnSplitChange(2, scn);
                         }
 
                         ImGui::Text("Select Camera for screen 1:");
@@ -425,8 +408,7 @@ namespace igl
                                 {
                                     current_item = viewer->data()->cameras.at(n).c_str();
                                     viewer->data()->cameraScreen1Indx = n;
-                                    GuiHandler::OnSetCamera(0, n, (Project *)viewer);
-                                    std::cout << "Selected in combo: " << current_item << std::endl;
+                                    GuiHandler::OnSetCamera(0, n, scn);
                                 }
                                 if (is_selected)
                                 {
@@ -448,8 +430,7 @@ namespace igl
                                 {
                                     current_item2 = viewer->data()->cameras.at(n).c_str();
                                     viewer->data()->cameraScreen2Indx = n;
-                                    GuiHandler::OnSetCamera(1, n, (Project *)viewer);
-                                    std::cout << "Selected in combo: " << current_item2 << std::endl;
+                                    GuiHandler::OnSetCamera(1, n, scn);
                                 }
                                 if (is_selected)
                                 {
@@ -463,7 +444,7 @@ namespace igl
                         if (ImGui::Button("Add Camera"))
                         {
                             viewer->data()->cameras.push_back(viewer->data()->camera_name);
-                            GuiHandler::OnAddCamera(viewer->data()->camera_name, (Project *)viewer);
+                            GuiHandler::OnAddCamera(viewer->data()->camera_name, scn);
                         }
                     }
 
@@ -472,15 +453,13 @@ namespace igl
                         if (ImGui::Checkbox("Play Animation", &(viewer->data()->play_is_active)))
                         {
                             viewer->isActive = viewer->data()->play_is_active;
-                            GuiHandler::OnPlayChanged(viewer->isActive, (Project *)viewer);
+                            GuiHandler::OnPlayChanged(viewer->isActive, scn);
                             if (viewer->isActive)
                                 viewer->Activate();
                             else
                                 viewer->Deactivate();
-                            // viewer->Animate();
                         }
                         
-                        // ImGui::DragFloat("Max time ", &(project->max_time), 0.05f, 0.0f, 100.0f, "%.0f");
                         if (ImGui::SliderFloat("Time Scale", &(scn->time), 0, (scn)->max_time, "%.1f"))
                         {
                             
@@ -491,12 +470,12 @@ namespace igl
                         {
                             ImGui::InputFloat3("point", scn->bizPoint);
                             if (ImGui::Button("Add point"))
-                                GuiHandler::onAddPoint(scn->bizPoint, (Project *)viewer);
+                                GuiHandler::onAddPoint(scn->bizPoint, scn);
                             ImGui::InputFloat2("time", scn->start_end_time);
                             if (ImGui::Button("Add Bézier movment"))
-                                GuiHandler::onAddBiz(scn->start_end_time, (Project *)viewer);
+                                GuiHandler::onAddBiz(scn->start_end_time, scn);
                             if (ImGui::Button("Remove Bézier movment"))
-                                GuiHandler::onRemoveBiz((Project *)viewer);
+                                GuiHandler::onRemoveBiz(scn);
                         }
                     }
 

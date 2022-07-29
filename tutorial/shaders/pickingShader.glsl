@@ -7,5 +7,5 @@ uniform vec4 lightDirection;
 out vec4 Color;
 void main()
 {
-	Color = vec4(1,0,0,0.7);
+	Color = vec4(0,0,1,0.7);
 }

@@ -8,7 +8,7 @@
 #include <igl/opengl/glfw/imgui/ImGuiMenu.h>
 #include <igl/opengl/glfw/imgui/ImGuiHelpers.h>
 #include <../imgui/imgui.h>
-#include <tutorial/Project/SceneShape.h>
+#include <tutorial/Project/SceneObject.h>
 #include "../DrawBuffer.h"
 #include "../Camera.h"
 #include "../ViewerData.h"

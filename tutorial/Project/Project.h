@@ -1,6 +1,6 @@
 #pragma once
 #include "igl/opengl/glfw/Viewer.h"
-#include "SceneShape.h"
+#include "SceneObject.h"
 #include "igl/opengl/glfw/renderer.h"
 
 class Project : public igl::opengl::glfw::Viewer
@@ -16,16 +16,13 @@ public:
     void Animate() override;
     void ScaleAllShapes(float amt, int viewportIndx);
     void SetRenderer(Renderer *renderer);
-    void SetParent(int shape, int newParent);
-    int GetParent(int shape);
     void SetMenu(igl::opengl::glfw::imgui::ImGuiMenu *menu);
     igl::opengl::glfw::imgui::ImGuiMenu *menu;
-    std::vector<int> GetChildren(int shape);
-    bool Load_Shape_From_File(const std::string &mesh_file_name_string);
+    bool LoadMeshFromFile(const std::string &mesh_file_name_string);
     IGL_INLINE void my_open_dialog_load_mesh();
     void Play();
     float time = 0;
-    std::vector<SceneShape*> shapesGlobal;
+    std::vector<SceneObject*> sceneObjects;
     int cubeMapIndx = -1;
     int pickingPlaneIndx = -1;
     int blurShaderIndx = -1;
@@ -33,7 +30,7 @@ public:
     float max_time = 1;
     ~Project(void);
     void ChangeCubeMap(std::string file_name);
-    void NextCubeMap();
+    void PassCubeMap();
     long globalTime;
     std::vector<Layer *> layers;
     Renderer *GetRenderer() { return renderer; }
@@ -45,14 +42,14 @@ public:
     float start_end_time[2] = { 0, max_time };
     std::vector<int> farShapes;
     void updateFarShapes();
-    float calculateCameraDistance(SceneShape *shp);
+    float calcDistanceFromCam(SceneObject *shp);
     float farCoeff = 20;
-    void ModeChange();
+    void TextureModeChange();
 
 private:
     Renderer *renderer = nullptr;
-    int AddGlobalShapeFromFile(std::string name, std::string file_name, int parent, Viewer *viewer, int viewPort);
-    int AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes shapeType, Viewer *viewer, int parent, int viewPort);
+    int AddShapeObjectFromFile(std::string name, std::string file_name, int parent, Viewer *viewer, int viewPort);
+    int AddShapeObject(std::string name, igl::opengl::glfw::Viewer::shapes shapeType, Viewer *viewer, int parent, int viewPort);
 
     bool animating;
 };

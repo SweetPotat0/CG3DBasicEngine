@@ -219,10 +219,6 @@ void Renderer::UpdatePress(float xpos, float ypos)
 }
 
 void Renderer::ChangeCameraRelation(int cameraIndx,float relationWH){
-    // igl::opengl::Camera* old = cameras[cameraIndx];
-    // std::cout<<"fov: "<<old->_fov<<", "<<relationWH<<","<<old->GetNear()<<","<<old->GetFar()<<std::endl;
-    // cameras[cameraIndx] = new igl::opengl::Camera(old->_fov,relationWH, old->GetNear(), old->GetFar());
-    // delete old;
     cameras[cameraIndx]->SetProjection(cameras[cameraIndx]->_fov,relationWH);
 }
 
@@ -233,7 +229,7 @@ void Renderer::AddCamera(const Eigen::Vector3d& pos, float fov, float relationWH
         drawInfos[infoIndx]->SetCamera(cameras.size());
     }
     cameras.push_back(new igl::opengl::Camera(fov, relationWH, zNear, zFar));
-//    cameras.back()->MyTranslate(pos, false);
+    cameras.back()->MyTranslate(pos, false);
 }
 
 void Renderer::AddViewport(int left, int bottom, int width, int height)
@@ -370,7 +366,6 @@ IGL_INLINE void Renderer::post_resize(GLFWwindow* window, int w, int h)
         }
         float ratio_x = (float)w/(float)x;
         float ratio_y = (float)h/(float)y;
-        std::cout << "called" << std::endl;
         for(auto & viewport : viewports){
             viewport = Eigen::Vector4i((int)((float)viewport.x()*ratio_x),(int)((float)viewport.y()*ratio_y),(int)((float)viewport.z()*ratio_x),(int)((float)viewport.w()*ratio_y));
         }
@@ -416,7 +411,6 @@ void Renderer::MoveCamera(int cameraIndx, int type, float amt)
 
 
             cameras[cameraIndx]->MyTranslate(Eigen::Vector3d(-cameraPos.x(), -cameraPos.y(), -cameraPos.z()),1);//MakeTransNoScale was here
-            std::cout<<"x: "<< cameraPos.x()<<" y: "<<cameraPos.y()<<" z: "<<cameraPos.z();
 
             cameras[cameraIndx]->MyRotate(Eigen::Vector3d(1, 0, 0),-cameraXAngle);
             cameras[cameraIndx]->MyRotate(Eigen::Vector3d(0, 1, 0),-cameraYAngle);
@@ -426,8 +420,6 @@ void Renderer::MoveCamera(int cameraIndx, int type, float amt)
             cameraNormal = Eigen::Vector3f(0,0,1);
             cameraYAngle=0;
             cameraXAngle=0;
-
-            std::cout<<"x: "<< cameraPos.x()<<" y: "<<cameraPos.y()<<" z: "<<cameraPos.z();
 
             break;
         }

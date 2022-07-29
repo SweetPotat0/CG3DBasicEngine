@@ -32,14 +32,27 @@ What we did:
     - Menu which includes:
         - Load object option, the new object will appear at (0,0,0)
         - Add layer option. Every object is attached to a layer. Layer can be hide or unhide
+        - Set layer to picked objects
         - Split screen around y axis or x axis.
+        - Choose main camera for each screen
         - Add camera option: Adding camera and switch between cameras at each screen
         - Time slider (define how much time after play button hits the animation will run).
         - Play checkbox for starts and stops the animation
         - Add/Change Material to picked object (each object can have only one material)
         - Zoom in to a chosen area and zoom out to a default state.
         - Set Transparent objects
+        - Set far coeff
         - Set blur objects
+        - Add bezier movement :
+            1) Add points
+            2) Choose time
+            3) Select objects
+            4) Add bezier movement
+        - Add childs to parent :
+            1) Select object to be childs
+            2) Press choose childs
+            3) Select object to be parent (only 1)
+            4) Press Set parent
     - Transparent objects
 
 Specials:
@@ -47,4 +60,9 @@ Specials:
     - Change the texture mode of picked objects
 
 Difficulties
+    - Understanding how renderer works, drawinfos, viewports.
+    - Managing bezier movements
+    - Gaussian blur, pick the right constants
+    - Picking - set viewports correct and call the right functions
+
 

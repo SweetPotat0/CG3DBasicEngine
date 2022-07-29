@@ -232,8 +232,6 @@ public:
                            const Eigen::MatrixXi &UV_F, int type, int parent, unsigned int mode, int viewport);
 
       int AddShader(const std::string &Vertex_Shader, const std::string &Fragment_shader);
-
-      void SetParent(int indx, int newValue, bool savePosition);
   };
 
 } // end namespace
