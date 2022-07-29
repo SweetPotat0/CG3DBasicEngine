@@ -74,7 +74,7 @@ int Project::AddGlobalShapeFromFile(std::string name, std::string file_name, int
         SetShapeViewport(index, 1);
     }
     SceneShape *scnShape = new SceneShape(name, MeshCopy, defaultLayer, index, viewer);
-    scnShape->setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
+    scnShape->setlastBizPosition(Eigen::Vector3f(0, 0, 0));
     shapesGlobal.push_back(scnShape);
     return index;
 }
@@ -88,7 +88,7 @@ int Project::AddGlobalShape(std::string name, igl::opengl::glfw::Viewer::shapes 
         SetShapeViewport(index, 1);
     }
     SceneShape *scnShape = new SceneShape(name, shapeType, defaultLayer, index, viewer);
-    scnShape->setlastDrawnPosition(Eigen::Vector3f(0, 0, 0));
+    scnShape->setlastBizPosition(Eigen::Vector3f(0, 0, 0));
     shapesGlobal.push_back(scnShape);
     return index;
 }
@@ -212,14 +212,9 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
     long ctime;
     if (isActive)
     {
-        if (data()->camera_split != 0)
-        {
-            data()->camera_split = 0;
-            GuiHandler::OnCameraSplitChange(0, this);
-        }
-        ++globalTime;
-        if (globalTime >= max_time)
-        {
+        if (shapeIndx == cubeMapIndx)
+            ++globalTime;
+        if (globalTime >= max_time) {
             globalTime = max_time;
             Deactivate();
         }
@@ -230,9 +225,12 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
 
     if (shapeIndx != cubeMapIndx && shapeIndx != pickingPlaneIndx)
     {
-        SceneShape *scnShape = shapesGlobal[shapeIndx];
-        Eigen::Vector3f pos = scnShape->getlastDrawnPosition();
-        Eigen::Vector3f newPos = scnShape->getPosition((float)ctime);
+
+        SceneShape* scnShape = shapesGlobal[shapeIndx];
+        Eigen::Vector3f pos = scnShape->getCurrentPosition();
+        Eigen::Vector3f bizPos = scnShape->getCurrentPositionAt((float)ctime);
+        Eigen::Vector3f newPos = scnShape->getDesignPosition() + bizPos;
+
         if (newPos != pos)
         {
             Eigen::Vector3f delta = newPos - pos;
@@ -240,7 +238,8 @@ void Project::Update(const Eigen::Matrix4f &Proj, const Eigen::Matrix4f &View, c
             ShapeTransformation(xTranslate, delta(x), 0);
             ShapeTransformation(yTranslate, delta(y), 0);
             ShapeTransformation(zTranslate, delta(z), 0);
-            shapesGlobal[shapeIndx]->setlastDrawnPosition(newPos);
+
+            scnShape->setlastBizPosition(bizPos);
         }
     }
 

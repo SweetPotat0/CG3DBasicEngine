@@ -153,9 +153,7 @@ void glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 
     if (rndr->IsPicked())
     {
-        std::cout << "picked!" << std::endl;
-        rndr->UpdateZpos((int)yoffset);
-        rndr->MouseProccessing(GLFW_MOUSE_BUTTON_MIDDLE);
+        movePickedObjects(yoffset, z, scn);
     }
     else
     {
