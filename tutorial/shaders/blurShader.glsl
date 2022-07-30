@@ -5,6 +5,7 @@ in vec3 normal0;
 in vec3 color0;
 in vec3 position0;
 in float shapeIndx;
+uniform vec2 transparency;
 in float r;//Radius of blur
 in float sigma;
 in vec2 texResolution;
@@ -47,6 +48,6 @@ void main()
             x++;
         }        
     }
-    Color=col;
+    Color=col * vec4(1,1,1, transparency.x);
 }
 
